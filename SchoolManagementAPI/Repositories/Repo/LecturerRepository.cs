@@ -21,15 +21,18 @@ namespace SchoolManagementAPI.Repositories.Repo
             };
         }
 
-        public Task Create(Lecturer lecturer)
+        public async Task Create(Lecturer lecturer)
         {
-            return _lecturerCollection.InsertOneAsync(lecturer);
+            await _lecturerCollection.InsertOneAsync(lecturer);
         }
 
-        public Task Delete(string id)
+        public async Task<bool> Delete(string id)
         {
             var filter = Builders<Lecturer>.Filter.Eq(l => l.ID, id);
-            return _lecturerCollection.DeleteOneAsync(filter);
+            var deleteResult =  await _lecturerCollection.DeleteOneAsync(filter);
+            if (deleteResult.DeletedCount > 0)
+                return true;
+            return false;
         }
 
         public async Task<IEnumerable<Lecturer>> GetAll()
