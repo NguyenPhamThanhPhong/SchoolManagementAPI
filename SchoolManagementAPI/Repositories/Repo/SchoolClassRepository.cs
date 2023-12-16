@@ -1,6 +1,8 @@
-﻿namespace SchoolManagementAPI.Repositories.Repo
+﻿using SchoolManagementAPI.Repositories.Interfaces;
+
+namespace SchoolManagementAPI.Repositories.Repo
 {
-    public class SchoolClassRepository
+    public class SchoolClassRepository : ISchoolClassRepository
     {
     }
 }

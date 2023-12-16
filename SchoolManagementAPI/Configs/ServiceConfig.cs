@@ -1,6 +1,7 @@
 ﻿using SchoolManagementAPI.Services.Configs;
 using SchoolManagementAPI.Repositories;
 using SchoolManagementAPI.Repositories.Repo;
+using SchoolManagementAPI.Repositories.Interfaces;
 
 namespace SchoolManagementAPI.Configs
 {
@@ -26,11 +27,11 @@ namespace SchoolManagementAPI.Configs
         }
         public static IServiceCollection ConfigRepositories(this IServiceCollection services, IConfiguration config)
         {
-            services.AddSingleton<LecturerRepository>();
-            services.AddSingleton<SchoolClassRepository>();
-            services.AddSingleton<ScheduleAggregationRepository>();
-            services.AddSingleton<StudentRepository>();
-            services.AddSingleton<SubjectRepository>();
+            services.AddSingleton<ILecturerRepository,LecturerRepository>();
+            services.AddSingleton<ISchoolClassRepository,SchoolClassRepository>();
+            services.AddSingleton<IScheduleAggregationRepository,ScheduleAggregationRepository>();
+            services.AddSingleton<IStudentRepository,StudentRepository>();
+            services.AddSingleton<ISubjectRepository, SubjectRepository>();
             return services;
         }
         public static IServiceCollection ConfigAuthentication(this IServiceCollection services, IConfiguration config)

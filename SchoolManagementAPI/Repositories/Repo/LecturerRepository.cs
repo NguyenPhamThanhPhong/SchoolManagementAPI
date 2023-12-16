@@ -25,7 +25,11 @@ namespace SchoolManagementAPI.Repositories.Repo
         {
             await _lecturerCollection.InsertOneAsync(lecturer);
         }
-
+        public Task<Lecturer> GetbyTextFilter(string textFilter)
+        {
+            var filter = Builders<Lecturer>.Filter.Text(textFilter);
+            var options = new FindOptions<Lecturer>()
+        }
         public async Task<bool> Delete(string id)
         {
             var filter = Builders<Lecturer>.Filter.Eq(l => l.ID, id);
