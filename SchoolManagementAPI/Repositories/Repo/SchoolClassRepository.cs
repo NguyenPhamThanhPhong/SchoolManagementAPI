@@ -2,7 +2,7 @@
 
 namespace SchoolManagementAPI.Repositories.Repo
 {
-    public class SchoolClassRepository : ISchoolClassRepository
+    public class SchoolClassRepository 
     {
     }
 }

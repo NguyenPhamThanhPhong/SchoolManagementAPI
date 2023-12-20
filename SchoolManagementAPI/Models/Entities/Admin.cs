@@ -1,15 +1,15 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using SchoolManagementAPI.Models.Embeded.Account;
+﻿using CloudinaryDotNet;
+using MongoDB.Bson.Serialization.Attributes;
 
 
 namespace SchoolManagementAPI.Models.Entities
 {
-    public class Admin
+    [BsonIgnoreExtraElements]
+    public class Admin : Models.Abstracts.Account
     {
-        [BsonId]
-        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string ID { get; set; } = String.Empty;
-        public AccountInformation?  AccountInfo { get; set; }
-
+        public Admin() : base()
+        {
+            this.Role = "admin";
+        }
     }
 }

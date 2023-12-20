@@ -10,7 +10,6 @@ namespace SchoolManagementAPI.Services.Configs
         public string DatabaseName { get; set; }
         public string StudentCollectionName { get; set; }
         public string SchoolClassCollectionName { get; set; }
-        public string ScheduleAggregationCollectionName { get; set; }
         public string SubjectCollectionName { get; set; }
         public string LecturerCollectionName { get; set; }
         public string AdminCollectionName { get; set; }
@@ -20,10 +19,12 @@ namespace SchoolManagementAPI.Services.Configs
         public IMongoClient MongoClient { get; set; }
         public IMongoDatabase  MongoDatabase { get; set; }
         public IMongoCollection<SchoolClass> SchoolClassCollection { get; set; }
-        public IMongoCollection<ScheduleAggregation> ScheduleAggregationCollection { get; set; }
         public IMongoCollection<Subject> SubjectCollection { get; set; }
-        public IMongoCollection<Lecturer> LecturerCollection { get; set; }
+
         public IMongoCollection<Admin> AdminCollection { get; set; }
+        public IMongoCollection<Lecturer> LecturerCollection { get; set; }
+        public IMongoCollection<Student> StudentCollection { get; set; }
+
         public IMongoCollection<Category> CategoryCollection { get; set; }
 
         public void SetUpDatabase()
@@ -37,13 +38,14 @@ namespace SchoolManagementAPI.Services.Configs
             MongoDatabase = MongoClient.GetDatabase(DatabaseName);
 
             SchoolClassCollection = MongoDatabase.GetCollection<SchoolClass>(SchoolClassCollectionName);
-            ScheduleAggregationCollection = MongoDatabase.GetCollection<ScheduleAggregation>(ScheduleAggregationCollectionName);
             
             SubjectCollection = MongoDatabase.GetCollection<Subject>(SubjectCollectionName);
-            
-            LecturerCollection = MongoDatabase.GetCollection<Lecturer>(LecturerCollectionName);
-                        
+
             AdminCollection = MongoDatabase.GetCollection<Admin>(AdminCollectionName);
+
+            LecturerCollection = MongoDatabase.GetCollection<Lecturer>(LecturerCollectionName);
+            StudentCollection = MongoDatabase.GetCollection<Student>(StudentCollectionName);
+                        
 
             CategoryCollection = MongoDatabase.GetCollection<Category>(CategoryCollectionName);
         }

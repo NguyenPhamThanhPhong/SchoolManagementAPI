@@ -28,10 +28,11 @@ namespace SchoolManagementAPI.Configs
         public static IServiceCollection ConfigRepositories(this IServiceCollection services, IConfiguration config)
         {
             services.AddSingleton<ILecturerRepository,LecturerRepository>();
-            services.AddSingleton<ISchoolClassRepository,SchoolClassRepository>();
-            services.AddSingleton<IScheduleAggregationRepository,ScheduleAggregationRepository>();
-            services.AddSingleton<IStudentRepository,StudentRepository>();
-            services.AddSingleton<ISubjectRepository, SubjectRepository>();
+            services.AddTransient<IAdminRepository,AdminRepository>();
+            services.AddSingleton<IStudentRepository, StudentRepository>();
+
+            //services.AddSingleton<IScheduleAggregationRepository,ScheduleAggregationRepository>();
+            //services.AddSingleton<ISubjectRepository, SubjectRepository>();
             return services;
         }
         public static IServiceCollection ConfigAuthentication(this IServiceCollection services, IConfiguration config)
@@ -40,6 +41,8 @@ namespace SchoolManagementAPI.Configs
         }
         public static IServiceCollection ConfigDI(this IServiceCollection services, IConfiguration config)
         {
+
+
             return services;
         }
     }

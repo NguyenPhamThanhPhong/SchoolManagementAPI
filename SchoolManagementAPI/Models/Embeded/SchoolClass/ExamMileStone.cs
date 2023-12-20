@@ -4,6 +4,6 @@
     {
         public DateTime StartTime { get; set; }
         public TimeSpan Duration { get; set; }
-        public string Room { get; set; }
+        public string? Room { get; set; }
     }
 }

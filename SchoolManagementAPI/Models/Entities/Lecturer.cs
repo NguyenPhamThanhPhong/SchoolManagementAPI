@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using SchoolManagementAPI.Models.Abstracts;
 using SchoolManagementAPI.Models.Embeded.Account;
 using SchoolManagementAPI.Models.Embeded.ReuseTypes;
 
@@ -6,21 +7,12 @@ using SchoolManagementAPI.Models.Embeded.ReuseTypes;
 
 namespace SchoolManagementAPI.Models.Entities
 {
-    public class Lecturer
+    public class Lecturer : SchoolMember
     {
-        [BsonId]
-        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string ID { get; set; }
-        public AccountInformation AccountInfo { get; set; }
-        public PersonalInformation PersonalInfo { get; set; }
-        public List<DataLink> Classes { get; set; }
-        public List<ScheduleAggregationLink> ScheduleAggregations { get; set; }
-        public Lecturer()
+
+        public Lecturer() : base()
         {
-            AccountInfo = new AccountInformation();
-            PersonalInfo= new PersonalInformation();
-            Classes = new List<DataLink>();
-            ScheduleAggregations = new List<ScheduleAggregationLink>();
+            Role = "lecturer";
         }
 
     }

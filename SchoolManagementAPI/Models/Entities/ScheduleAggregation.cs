@@ -17,6 +17,5 @@ namespace SchoolManagementAPI.Models.Entities
             Name = String.Empty;
             SchedulePartitions = new List<ClassSchedule>();
         }
-
     }
 }

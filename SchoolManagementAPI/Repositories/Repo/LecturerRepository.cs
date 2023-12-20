@@ -1,9 +1,11 @@
 ﻿using Microsoft.VisualBasic;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Models.Enum;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
+using System.Collections.ObjectModel;
 
 namespace SchoolManagementAPI.Repositories.Repo
 {
@@ -25,33 +27,46 @@ namespace SchoolManagementAPI.Repositories.Repo
         {
             await _lecturerCollection.InsertOneAsync(lecturer);
         }
-        public Task<Lecturer> GetbyTextFilter(string textFilter)
-        {
-            var filter = Builders<Lecturer>.Filter.Text(textFilter);
-            var options = new FindOptions<Lecturer>()
-        }
+
         public async Task<bool> Delete(string id)
         {
-            var filter = Builders<Lecturer>.Filter.Eq(l => l.ID, id);
-            var deleteResult =  await _lecturerCollection.DeleteOneAsync(filter);
-            if (deleteResult.DeletedCount > 0)
-                return true;
-            return false;
+            var deleteResult = await _lecturerCollection.DeleteOneAsync(l => l.ID == id);
+            return deleteResult.DeletedCount > 0;
         }
 
-        public async Task<IEnumerable<Lecturer>> GetAll()
+        public async Task<Lecturer> GetbyTextFilter(string textFilter)
         {
-            var filter = Builders<Lecturer>.Filter.Empty;
+            var filter = Builders<Lecturer>.Filter.Text(textFilter);
+            var lecturer = await _lecturerCollection.Find(filter).FirstOrDefaultAsync();
+
+            return lecturer;
+        }
+
+        public  Task<Lecturer> GetbyUsername(string username)
+        {
+            var filter = Builders<Lecturer>.Filter.Eq(l=>l.Username, username);
+            return  _lecturerCollection.Find(filter).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<Lecturer>> GetManyfromIds(List<string> ids)
+        {
+            var filter = Builders<Lecturer>.Filter.In(l => l.ID, ids);
             return await _lecturerCollection.Find(filter).ToListAsync();
+
         }
 
-        public async Task<Lecturer> GetLogin(string username)
+        public async Task<IEnumerable<Lecturer>> GetManyRange(int start, int end)
         {
-            var filter = Builders<Lecturer>.Filter.Eq(l=>l.AccountInfo.Username,username);
-            return await _lecturerCollection.Find(filter).FirstOrDefaultAsync();
+            return await _lecturerCollection.Find(_ => true).Skip(start).Limit(end - start).ToListAsync();
         }
 
-        public async Task<bool> Update(string id, List<UpdateParameter> parameters)
+        public async Task<bool> UpdatebyInstance(string id, Lecturer instance)
+        {
+            var updateResult = await _lecturerCollection.ReplaceOneAsync(id, instance); ;
+            return updateResult.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdatebyParameters(string id, List<UpdateParameter> parameters)
         {
             var filter = Builders<Lecturer>.Filter.Eq(p => p.ID, id);
             var updateBuilder = Builders<Lecturer>.Update;
