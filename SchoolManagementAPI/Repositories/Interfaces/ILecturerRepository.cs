@@ -14,6 +14,6 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task<bool> Delete(string id);
 
         public Task<bool> UpdatebyParameters(string id, List<UpdateParameter> parameters);
-        public Task<bool> UpdatebyInstance(string id, Lecturer instance);
+        public Task<bool> UpdatebyInstance(Lecturer instance);
     }
 }

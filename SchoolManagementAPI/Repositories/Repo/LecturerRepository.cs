@@ -60,9 +60,9 @@ namespace SchoolManagementAPI.Repositories.Repo
             return await _lecturerCollection.Find(_ => true).Skip(start).Limit(end - start).ToListAsync();
         }
 
-        public async Task<bool> UpdatebyInstance(string id, Lecturer instance)
+        public async Task<bool> UpdatebyInstance(Lecturer instance)
         {
-            var updateResult = await _lecturerCollection.ReplaceOneAsync(id, instance); ;
+            var updateResult = await _lecturerCollection.ReplaceOneAsync(l=>l.ID==instance.ID, instance); ;
             return updateResult.ModifiedCount > 0;
         }
 
