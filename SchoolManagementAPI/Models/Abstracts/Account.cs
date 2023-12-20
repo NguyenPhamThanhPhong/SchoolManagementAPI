@@ -4,6 +4,7 @@ namespace SchoolManagementAPI.Models.Abstracts
 {
     public class Account
     {
+        [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.String)]
         public string ID { get; set; }
         public string? Username { get; set; }

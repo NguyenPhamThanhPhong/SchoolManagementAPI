@@ -7,11 +7,11 @@ namespace SchoolManagementAPI.Repositories.Interfaces
     {
         public Task Create(Subject subject);
 
-        public Task<Subject> GetOne(string id);
+        public Task<Subject?> GetOne(string id);
         public Task<IEnumerable<Subject>> GetAll();
 
-        public Task UpdatebyParameters(IEnumerable<UpdateParameter> parameters);
-        public Task UpdatebyInstance(Subject subject);
+        public Task<bool> UpdatebyParameters(string id,IEnumerable<UpdateParameter> parameters);
+        public Task<bool> UpdatebyInstance(Subject subject);
 
         public Task DeleteMany(IEnumerable<string> ids);
     }

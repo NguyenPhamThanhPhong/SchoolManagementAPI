@@ -21,22 +21,22 @@ namespace SchoolManagementAPI.Repositories.Repo
             await _studentCollection.InsertOneAsync(student);
         }
 
-        public async Task<bool> Delete(string id)
+        public async Task<Student?> Delete(string id)
         {
-            var deleteResult = await _studentCollection.DeleteOneAsync(s => s.ID == id);
-            return deleteResult.DeletedCount > 0;
+            var deleteResult = await _studentCollection.FindOneAndDeleteAsync(id);
+            return deleteResult;
         }
 
-        public Task<Student> GetbyTextFilter(string textFilter)
+        public async Task<IEnumerable<Student>> GetbyTextFilter(string textFilter)
         {
             var filter = Builders<Student>.Filter.Text(textFilter);
-            return _studentCollection.Find(filter).FirstOrDefaultAsync();
+            return await _studentCollection.Find(filter).ToListAsync();
         }
 
-        public Task<Student> GetbyUsername(string username)
+        public async Task<Student?> GetbyUsername(string username)
         {
             var filter = Builders<Student>.Filter.Eq(s => s.Username,username);
-            return _studentCollection.Find(filter).FirstOrDefaultAsync();
+            return await _studentCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Student>> GetManyfromIds(List<string> ids)
@@ -73,6 +73,32 @@ namespace SchoolManagementAPI.Repositories.Repo
                         break;
                     case UpdateOption.pull:
                         subUpdates.Add(Builders<Student>.Update.Pull(parameter.fieldName, parameter.value));
+                        break;
+                }
+            }
+            var combinedUpdate = updateBuilder.Combine(subUpdates);
+
+            UpdateResult result = await _studentCollection.UpdateOneAsync(filter, combinedUpdate);
+            return result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdateStringFields(string id, List<UpdateParameter> parameters)
+        {
+            var filter = Builders<Student>.Filter.Eq(p => p.ID, id);
+            var updateBuilder = Builders<Student>.Update;
+            List<UpdateDefinition<Student>> subUpdates = new List<UpdateDefinition<Student>>();
+            foreach (var parameter in parameters)
+            {
+                switch (parameter.option)
+                {
+                    case UpdateOption.set:
+                        subUpdates.Add(Builders<Student>.Update.Set(parameter.fieldName, parameter.value.ToString()));
+                        break;
+                    case UpdateOption.push:
+                        subUpdates.Add(Builders<Student>.Update.Push(parameter.fieldName, parameter.value.ToString()));
+                        break;
+                    case UpdateOption.pull:
+                        subUpdates.Add(Builders<Student>.Update.Pull(parameter.fieldName, parameter.value.ToString()));
                         break;
                 }
             }
