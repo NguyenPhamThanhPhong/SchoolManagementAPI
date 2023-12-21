@@ -8,7 +8,7 @@ namespace SchoolManagementAPI.RequestResponse.Request
         [Required]
         public string fieldName { get; set; }
         [Required]
-        public string value { get; set; }
+        public Object value { get; set; }
         [Required]
         public UpdateOption option { get; set; }
     }

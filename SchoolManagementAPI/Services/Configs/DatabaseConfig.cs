@@ -30,6 +30,7 @@ namespace SchoolManagementAPI.Services.Configs
         public void SetUpDatabase()
         {
             InstantiateCollections();
+            CreateUniqueIndex();
         }
         private void InstantiateCollections()
         {
@@ -49,12 +50,13 @@ namespace SchoolManagementAPI.Services.Configs
             CategoryCollection = MongoDatabase.GetCollection<Category>(CategoryCollectionName);
         }
 
-        //private void CreateUniqueIndex()
-        //{
-        //    var indexKeysDefinition = Builders<User>.IndexKeys.Ascending(User.GetFieldName(u=>u.AuthenticationInfo.Username));
-        //    var indexOptions = new CreateIndexOptions { Unique = true };
+        private void CreateUniqueIndex()
+        {
+            var indexKeysDefinition = Builders<Student>
+                .IndexKeys.Ascending(Student.GetFieldName(u => u.Username));
+            var indexOptions = new CreateIndexOptions { Unique = true };
 
-        //    UserCollection.Indexes.CreateOne(new CreateIndexModel<User>(indexKeysDefinition, indexOptions));
-        //}
+            StudentCollection.Indexes.CreateOne(new CreateIndexModel<Student>(indexKeysDefinition, indexOptions));
+        }
     }
 }

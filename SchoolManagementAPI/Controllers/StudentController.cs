@@ -21,7 +21,7 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpPost("/student-create")]
-        public async Task<IActionResult> Create([FromBody] StudentCreateRequest request)
+        public async Task<IActionResult> Create([FromBody] SchoolMemberCreateRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

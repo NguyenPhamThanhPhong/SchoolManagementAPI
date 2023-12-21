@@ -13,8 +13,8 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task<IEnumerable<SchoolClass>> GetManyRange(int start, int end);
         public Task<IEnumerable<SchoolClass>> GetfromIds(List<string> ids);
 
-        public Task UpdateByParameters(IEnumerable<UpdateParameter> parameters);
-        public Task UpdatebyInstance(SchoolClass schoolClass);
+        public Task<bool> UpdateByParameters(string id,IEnumerable<UpdateParameter> parameters);
+        public Task<bool> UpdatebyInstance(SchoolClass schoolClass);
 
     }
 }

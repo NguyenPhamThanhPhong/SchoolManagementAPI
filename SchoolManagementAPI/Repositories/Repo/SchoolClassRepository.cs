@@ -44,12 +44,12 @@ namespace SchoolManagementAPI.Repositories.Repo
             throw new NotImplementedException();
         }
 
-        public Task UpdatebyInstance(SchoolClass schoolClass)
+        public Task<bool> UpdatebyInstance(SchoolClass schoolClass)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateByParameters(IEnumerable<UpdateParameter> parameters)
+        public Task<bool> UpdateByParameters(string id,IEnumerable<UpdateParameter> parameters)
         {
             throw new NotImplementedException();
         }

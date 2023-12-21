@@ -8,7 +8,9 @@ namespace SchoolManagementAPI.Services.Configs
     {
         public AutoMapperConfig()
         {
-            CreateMap<StudentCreateRequest, Student>();
+            CreateMap<SchoolMemberCreateRequest, Student>();
+            CreateMap<SchoolMemberCreateRequest, Lecturer>();
+            CreateMap<AccountCreateRequest, Admin>();
         }
     }
 }

@@ -32,11 +32,11 @@ namespace SchoolManagementAPI.Configs
         }
         public static IServiceCollection ConfigRepositories(this IServiceCollection services, IConfiguration config)
         {
-            //services.AddTransient<ILecturerRepository,LecturerRepository>();
-            //services.AddTransient<IAdminRepository,AdminRepository>();
+            services.AddTransient<ILecturerRepository, LecturerRepository>();
+            services.AddTransient<IAdminRepository, AdminRepository>();
             services.AddTransient<IStudentRepository, StudentRepository>();
-            //services.AddTransient<ISubjectRepository, SubjectRepository>();
-            //services.AddTransient<ISchoolClassRepository,SchoolClassRepository>();
+            services.AddTransient<ISubjectRepository, SubjectRepository>();
+            services.AddTransient<ISchoolClassRepository, SchoolClassRepository>();
             return services;
         }
         public static IServiceCollection ConfigAuthentication(this IServiceCollection services, IConfiguration config)

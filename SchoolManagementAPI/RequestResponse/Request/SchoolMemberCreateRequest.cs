@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SchoolManagementAPI.RequestResponse.Request
 {
-    public class StudentCreateRequest
+    public class SchoolMemberCreateRequest
     {
         public string? Username { get; set; }
         public string? Password { get; set; }

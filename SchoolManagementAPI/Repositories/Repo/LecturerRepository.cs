@@ -5,6 +5,7 @@ using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Models.Enum;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.Configs;
 using System.Collections.ObjectModel;
 
 namespace SchoolManagementAPI.Repositories.Repo
@@ -14,9 +15,9 @@ namespace SchoolManagementAPI.Repositories.Repo
         private readonly IMongoCollection<Lecturer> _lecturerCollection;
         private readonly FindOneAndUpdateOptions<Lecturer> _options;
 
-        public LecturerRepository(IMongoCollection<Lecturer> lecturerCollection)
+        public LecturerRepository(DatabaseConfig databaseConfig )
         {
-            _lecturerCollection = lecturerCollection;
+            _lecturerCollection = databaseConfig.LecturerCollection;
             this._options = new FindOneAndUpdateOptions<Lecturer>()
             {
                 ReturnDocument = ReturnDocument.After
