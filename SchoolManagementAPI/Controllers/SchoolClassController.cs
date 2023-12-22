@@ -52,6 +52,6 @@ namespace SchoolManagementAPI.Controllers
             var isUpdated = await _schoolClassRepository.UpdateByParameters(id,new List<UpdateParameter> { parameter});
             return Ok("updated");
         }
-
+        [HttpPost("/class-student")]
     }
 }
