@@ -40,7 +40,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(schoolClass);
         }
         [HttpPost("/class-student-registration-action/{id}/{action}")]
-        public async Task<IActionResult> UpdateStudent(string id,UpdateOption option,[FromBody] StudentLog studentLog)
+        public async Task<IActionResult> UpdateStudentRegistration(string id,UpdateOption option,[FromBody] StudentLog studentLog)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -52,6 +52,40 @@ namespace SchoolManagementAPI.Controllers
             var isUpdated = await _schoolClassRepository.UpdateByParameters(id,new List<UpdateParameter> { parameter});
             return Ok("updated");
         }
-        [HttpPost("/class-student")]
+
+        [HttpDelete("/class-delete/{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var deleteResult = await _schoolClassRepository.Delete(id);
+            if (deleteResult)
+                return Ok($"deleted {deleteResult}");
+            return BadRequest(deleteResult);
+        }
+        [HttpGet("/get-single/{id}")]
+        public async Task<IActionResult> GetOne(string id)
+        {
+            var schoolclass = await _schoolClassRepository.GetSingle(id);
+            if(schoolclass!=null)
+                return Ok(schoolclass);
+            return BadRequest("false");
+        }
+        [HttpPost("/get-filter")]
+        public async Task<IActionResult> GetFilter(string textFilter)
+        {
+            var schoolClasses = await _schoolClassRepository.GetbyTextFilter(textFilter);
+            return Ok(schoolClasses);
+        }
+        [HttpGet("/class-get-many-range/{start}/{end}")]
+        public async Task<IActionResult> GetManyRange(int start,int end)
+        {
+            var classes = await _schoolClassRepository.GetManyRange(start, end);
+            return Ok(classes);
+        }
+        [HttpPost("/class-get-from-ids/")]
+        public async Task<IActionResult> GetManyRange(List<string> ids)
+        {
+            var classes = await _schoolClassRepository.GetfromIds(ids);
+            return Ok(classes);
+        }
     }
 }

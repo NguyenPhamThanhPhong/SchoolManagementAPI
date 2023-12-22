@@ -35,24 +35,25 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public async Task<Student?> GetbyUsername(string username)
         {
-            var filter = Builders<Student>.Filter.Eq(s => s.Username,username);
+            var filter = Builders<Student>.Filter.Eq(s => s.Username, username);
             return await _studentCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Student>> GetManyfromIds(List<string> ids)
         {
-            var filter = Builders<Student>.Filter.In(s => s.ID,ids);
+            var filter = Builders<Student>.Filter.In(s => s.ID, ids);
             return await _studentCollection.Find(filter).ToListAsync();
         }
 
-        public async Task<IEnumerable<Student>> GetManyRange(int start, int end)
+        public  async Task<IEnumerable<Student>> GetManyRange(int start, int end)
         {
-            return await _studentCollection.Find(_ => true).Skip(start).Limit(end - start).ToListAsync();
+            var sort = Builders<Student>.Sort.Descending(s => s.ID);
+            return await _studentCollection.Find(_ => true).Skip(start).Sort(sort).Limit(end - start).ToListAsync();
         }
 
         public async Task<bool> UpdatebyInstance(string id, Student instance)
         {
-             var deleteResult = await _studentCollection.ReplaceOneAsync(s => s.ID == id, instance);
+            var deleteResult = await _studentCollection.ReplaceOneAsync(s => s.ID == id, instance);
             return deleteResult.ModifiedCount > 0;
         }
 
