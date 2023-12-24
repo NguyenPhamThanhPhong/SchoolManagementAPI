@@ -37,7 +37,7 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public async Task<Lecturer?> GetbyTextFilter(string textFilter)
         {
-            var filter = Builders<Lecturer>.Filter.Text(textFilter);
+            var filter = BsonDocument.Parse(textFilter);
             var lecturer = await _lecturerCollection.Find(filter).FirstOrDefaultAsync();
             return lecturer;
         }

@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using SchoolManagementAPI.Models.Abstracts;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Models.Enum;
@@ -48,7 +49,7 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public async Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter)
         {
-            var filter = Builders<SchoolClass>.Filter.Text(textFilter);
+            var filter = BsonDocument.Parse(textFilter);
             return await _schoolClassCollection.Find(filter).ToListAsync();
         }
 

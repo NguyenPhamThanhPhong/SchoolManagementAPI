@@ -7,8 +7,8 @@
         public string CloudName { get; set; }
         public string APIKey { get; set; }
         public string APISecretKey { get; set; }
-        public string UserFolderName { get; set; }
-        public string PostFolderName { get; set; }
-        public string MessageFolderName { get; set; }
+        public string ClassSection { get; set; }
+        public string StudentFolderName { get; set; }
+        public string LecturerFolderName { get; set; }
     }
 }

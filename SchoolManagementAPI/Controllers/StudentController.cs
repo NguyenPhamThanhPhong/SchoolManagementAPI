@@ -56,8 +56,9 @@ namespace SchoolManagementAPI.Controllers
             return Ok(students);
         }
         [HttpPost("/student-get-by-text-filter")]
-        public async Task<IActionResult> GetbyTextFilter([FromBody] string filter)
+        public async Task<IActionResult> GetbyTextFilter([FromForm] string filter)
         {
+            Console.WriteLine("in controller: \n"+ filter+"\n");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var students = await _studentRepository.GetbyTextFilter(filter);

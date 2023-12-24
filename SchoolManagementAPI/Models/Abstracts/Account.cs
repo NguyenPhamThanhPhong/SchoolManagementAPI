@@ -13,7 +13,6 @@ namespace SchoolManagementAPI.Models.Abstracts
         public string? Password { get; set; }
         public string? Email { get; set; }
         public string? Role { get; set; }
-
         public Account()
         {
             this.ID = string.Empty;

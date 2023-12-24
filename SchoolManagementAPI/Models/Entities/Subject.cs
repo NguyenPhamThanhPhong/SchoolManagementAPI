@@ -10,9 +10,9 @@ namespace SchoolManagementAPI.Models.Entities
         [BsonId]
         public string ID { get; set; } = "";
         public string? Name { get; set; }
-        public string? Prequisite { get; set; }
-        public string? PreviousSubject { get; set; }
-        public ClassLog? Classes { get; set; }
+        public string? PrequisiteId { get; set; }
+        public string? PreviousSubjectId { get; set; }
+        public List<string> ClassIds { get; set; }
         public static string GetFieldName<T>(Expression<Func<Subject, T>> expression)
         {
             var memberExpression = expression.Body as MemberExpression;

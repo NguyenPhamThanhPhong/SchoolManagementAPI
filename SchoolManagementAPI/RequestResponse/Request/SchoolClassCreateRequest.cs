@@ -7,6 +7,7 @@ namespace SchoolManagementAPI.RequestResponse.Request
 {
     public class SchoolClassCreateRequest
     {
+        [Required]
         public string ID { get; set; }
         public string? Name { get; set; }
         public string? RoomName { get; set; }
@@ -15,6 +16,7 @@ namespace SchoolManagementAPI.RequestResponse.Request
         [Required]
         public Subject Subject { get; set; }
         public Semester Semester { get; set; }
+        public ClassSchedule? Schedule { get; set; }
         public List<StudentLog>? StudentLog { get; set; }
     }
 }

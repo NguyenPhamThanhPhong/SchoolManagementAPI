@@ -70,7 +70,7 @@ namespace SchoolManagementAPI.Controllers
             return BadRequest("false");
         }
         [HttpPost("/get-filter")]
-        public async Task<IActionResult> GetFilter(string textFilter)
+        public async Task<IActionResult> GetFilter([FromForm]string textFilter)
         {
             var schoolClasses = await _schoolClassRepository.GetbyTextFilter(textFilter);
             return Ok(schoolClasses);
@@ -82,10 +82,46 @@ namespace SchoolManagementAPI.Controllers
             return Ok(classes);
         }
         [HttpPost("/class-get-from-ids/")]
-        public async Task<IActionResult> GetManyRange(List<string> ids)
+        public async Task<IActionResult> GetfromIds(List<string> ids)
         {
             var classes = await _schoolClassRepository.GetfromIds(ids);
             return Ok(classes);
+        }
+        [HttpPost("/class-update-schedule/{id}")]
+        public async Task<IActionResult> SetSchedule(string id,[FromForm] ClassSchedule schedulePiece)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var paramter = new UpdateParameter
+            {
+                fieldName = SchoolClass.GetFieldName(s => s.Schedule),
+                value = schedulePiece,
+                option = UpdateOption.set
+            };
+            var isUpdated = await _schoolClassRepository.UpdateByParameters(id, new List<UpdateParameter> { paramter }); 
+            return Ok(isUpdated);
+        }
+        [HttpPost("/class-update-sections/{id}/{updateOption}")]
+        public async Task<IActionResult> UpdateSections(string id, UpdateOption updateOption, [FromForm] List<SchoolClassUpdateSectionsRequest> requests)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (updateOption == UpdateOption.set)
+                return BadRequest("can't set, only push and pull");
+            List<UpdateParameter> paramters = new List<UpdateParameter>();
+            foreach(var request in requests)
+            {
+                var section = _mapper.Map<Section>(request);
+                var paramter = new UpdateParameter
+                {
+                    fieldName = SchoolClass.GetFieldName(s => s.Schedule),
+                    value = section,
+                    option = updateOption
+                };
+                paramters.Add(paramter);
+            }
+            var isUpdated = await _schoolClassRepository.UpdateByParameters(id, paramters);
+            return Ok(isUpdated);
         }
     }
 }

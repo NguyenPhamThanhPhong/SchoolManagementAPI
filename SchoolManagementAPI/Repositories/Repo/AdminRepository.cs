@@ -30,14 +30,14 @@ namespace SchoolManagementAPI.Repositories.Repo
             return await _adminCollection.Find(_ => true).ToListAsync();
         }
 
-        public Task<Admin> GetbyID(string id)
+        public async Task<Admin?> GetbyID(string id)
         {
-            return _adminCollection.Find(a=>a.ID==id).FirstOrDefaultAsync();
+            return await _adminCollection.Find(a=>a.ID==id).FirstOrDefaultAsync();
         }
 
-        public Task<Admin> GetbyUsername(string username)
+        public async Task<Admin?> GetbyUsername(string username)
         {
-            return _adminCollection.Find(a => a.Username == username).FirstOrDefaultAsync();
+            return await  _adminCollection.Find(a => a.Username == username).FirstOrDefaultAsync();
         }
 
         public async Task<bool> UpdatebyInstance(string id, Admin instance)

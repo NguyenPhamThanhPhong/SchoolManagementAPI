@@ -3,6 +3,7 @@ using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Models.Enum;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.Configs;
 
 namespace SchoolManagementAPI.Repositories.Repo
 {
@@ -10,9 +11,9 @@ namespace SchoolManagementAPI.Repositories.Repo
     {
         private readonly IMongoCollection<Subject> _subjectCollection;
 
-        public SubjectRepository(IMongoCollection<Subject> subjects)
+        public SubjectRepository(DatabaseConfig databaseConfig)
         {
-            _subjectCollection = subjects;
+            _subjectCollection = databaseConfig.SubjectCollection;
         }
 
         public Task Create(Subject subject)
@@ -26,9 +27,15 @@ namespace SchoolManagementAPI.Repositories.Repo
             return _subjectCollection.DeleteManyAsync(filter);
         }
 
-        public async Task<IEnumerable<Subject>> GetAll()
+        public Task DeleteOne(string id)
         {
-            return await _subjectCollection.Find(_ => true).ToListAsync();
+            var filter = Builders<Subject>.Filter.Eq(s=>s.ID,id);
+            return _subjectCollection.DeleteOneAsync(filter);
+        }
+
+        public async Task<IEnumerable<Subject>> GetManyRange(int start, int end)
+        {
+            return await _subjectCollection.Find(_ => true).Skip(start).Limit(start-end).ToListAsync();
         }
 
         public async  Task<Subject?> GetOne(string id)

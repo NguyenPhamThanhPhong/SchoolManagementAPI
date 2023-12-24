@@ -2,6 +2,8 @@
 using SchoolManagementAPI.Repositories;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.Repositories.Interfaces;
+using SchoolManagementAPI.Services.SMTP;
+using SchoolManagementAPI.Services.CloudinaryService;
 
 namespace SchoolManagementAPI.Configs
 {
@@ -45,7 +47,33 @@ namespace SchoolManagementAPI.Configs
         }
         public static IServiceCollection ConfigDI(this IServiceCollection services, IConfiguration config)
         {
+            //Cloudinary
+            CloudinaryConfig cloudinarySettings = new CloudinaryConfig();
+            config.Bind("CloudinarySettings", cloudinarySettings);
+            services.AddSingleton(cloudinarySettings);
+            services.AddSingleton<CloudinaryHandler>();
 
+            //SMTP
+            SMTPConfig smtpConfigs = new SMTPConfig();
+            config.Bind("SMTPConfiguration", smtpConfigs);
+            services.AddSingleton(smtpConfigs);
+            services.AddSingleton<EmailUtil>();
+
+            //JSON serializing option
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            });
+            //Allow all hosts
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
             return services;
         }
     }
