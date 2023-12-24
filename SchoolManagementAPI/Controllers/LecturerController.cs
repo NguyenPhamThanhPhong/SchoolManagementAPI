@@ -6,6 +6,7 @@ using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.SMTP;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -15,11 +16,14 @@ namespace SchoolManagementAPI.Controllers
     {
         private readonly ILecturerRepository _lecturerRepository;
         private readonly IMapper _mapper;
+        private readonly EmailUtil _emailUtil;
 
-        public LecturerController(ILecturerRepository lecturerRepository, IMapper mapper)
+
+        public LecturerController(ILecturerRepository lecturerRepository, IMapper mapper, EmailUtil emailUtil)
         {
             _lecturerRepository = lecturerRepository;
             _mapper = mapper;
+            _emailUtil = emailUtil;
         }
         [HttpPost("/lecturer-create")]
         public async Task<IActionResult> Create([FromBody] SchoolMemberCreateRequest request)
@@ -39,6 +43,21 @@ namespace SchoolManagementAPI.Controllers
             if (lecturer == null || lecturer.Password != request.Password)
                 return BadRequest("not found username");
             return Ok(lecturer);
+        }
+        [HttpGet("lecturer-get-password-in-mail/{username}")]
+        public async Task<IActionResult> Create(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var lecturer = await _lecturerRepository.GetbyUsername(username);
+            if (lecturer == null)
+                return BadRequest("not found username");
+            if (lecturer.Email == null)
+                return BadRequest("user's email doesn't exist ");
+
+            var isSent = await _emailUtil.SendEmailAsync(lecturer.Email, "no-reply: your password is", "this is your password" + lecturer.Password);
+
+            return Ok(isSent);
         }
         [HttpGet("/lecturer-get-all/{start}/{end}")]
         public async Task<IActionResult> ManyRange(int start, int end)

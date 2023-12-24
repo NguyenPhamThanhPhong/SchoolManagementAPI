@@ -1,10 +1,12 @@
-﻿using AutoMapper;
+﻿using Amazon.Runtime.Internal;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.SMTP;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -14,11 +16,13 @@ namespace SchoolManagementAPI.Controllers
     {
         private readonly IAdminRepository _adminRepository;
         private readonly IMapper _mapper;
+        private readonly EmailUtil _emailUtil;
 
-        public AdminController(IAdminRepository adminRepository, IMapper mapper)
+        public AdminController(IAdminRepository adminRepository, IMapper mapper, EmailUtil emailUtil)
         {
             _adminRepository = adminRepository;
             _mapper = mapper;
+            this._emailUtil = emailUtil;
         }
 
         [HttpPost("/admin-create")]
@@ -39,6 +43,21 @@ namespace SchoolManagementAPI.Controllers
             if (admin == null || admin.Password != request.Password)
                 return BadRequest("not found username");
             return Ok(admin);
+        }
+        [HttpGet("/admin-get-password-in-mail/{username}")]
+        public async Task<IActionResult> Create(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var admin = await _adminRepository.GetbyUsername(username);
+            if (admin == null)
+                return BadRequest("not found username");
+            if (admin.Email == null)
+                return BadRequest("user's email doesn't exist ");
+
+            var isSent = await _emailUtil.SendEmailAsync(admin.Email, "no-reply: your password is", "this is your password" + admin.Password);
+
+            return Ok(isSent);
         }
 
         [HttpGet("/admin-get-all")]

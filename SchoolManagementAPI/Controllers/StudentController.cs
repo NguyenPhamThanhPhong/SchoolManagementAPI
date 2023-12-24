@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
+using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.SMTP;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -13,11 +15,14 @@ namespace SchoolManagementAPI.Controllers
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
+        private readonly EmailUtil _emailUtil;
 
-        public StudentController(IStudentRepository studentRepository, IMapper mapper)
+
+        public StudentController(IStudentRepository studentRepository, IMapper mapper, EmailUtil emailUtil)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
+            _emailUtil = emailUtil;
         }
 
         [HttpPost("/student-create")]
@@ -38,6 +43,21 @@ namespace SchoolManagementAPI.Controllers
             if (student == null || student.Password != request.Password)
                 return BadRequest("not found username");
             return Ok(student);
+        }
+        [HttpGet("student-get-password-in-mail/{username}")]
+        public async Task<IActionResult> Create(string username)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var student = await _studentRepository.GetbyUsername(username);
+            if (student == null)
+                return BadRequest("not found username");
+            if (student.Email == null)
+                return BadRequest("user's email doesn't exist ");
+
+            var isSent = await _emailUtil.SendEmailAsync(student.Email, "no-reply: your password is", "this is your password" + student.Password);
+
+            return Ok(isSent);
         }
         [HttpGet("/student-get-all/{start}/{end}")]
         public async Task<IActionResult> ManyRange(int start, int end)
