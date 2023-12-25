@@ -1,4 +1,5 @@
-﻿using SchoolManagementAPI.Models.Entities;
+﻿using MongoDB.Driver;
+using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.RequestResponse.Request;
 
 namespace SchoolManagementAPI.Repositories.Interfaces
@@ -15,6 +16,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
 
         public Task<bool> UpdateByParameters(string id,IEnumerable<UpdateParameter> parameters);
         public Task<bool> UpdatebyInstance(SchoolClass schoolClass);
+        public Task<bool> UpdatebyFilter(FilterDefinition<SchoolClass> filter, UpdateDefinition<SchoolClass> update, bool isMany);
 
     }
 }

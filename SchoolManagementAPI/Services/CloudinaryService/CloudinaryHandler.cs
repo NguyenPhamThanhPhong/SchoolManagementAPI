@@ -18,26 +18,34 @@ namespace SchoolManagementAPI.Services.CloudinaryService
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<Dictionary<string, string?>> UploadImages(List<IFormFile> files, string folderName)
+        public async Task<Dictionary<string, string?>?> UploadImages(List<IFormFile>? files, string folderName)
         {
             var result = new Dictionary<string, string?>();
-
-            foreach (var file in files)
+            if (files == null)
+                return null;
+            try
             {
-                if (file.Length > 0)
+                foreach (var file in files)
                 {
-                    using (var stream = file.OpenReadStream())
+                    if (file.Length > 0)
                     {
-                        string fileName = Guid.NewGuid().ToString();
-                        var uploadParams = new ImageUploadParams
+                        using (var stream = file.OpenReadStream())
                         {
-                            File = new FileDescription(fileName, stream),
-                            Folder = folderName
-                        };
-                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                        result.Add(file.FileName, uploadResult.SecureUri.AbsoluteUri);
+                            string fileName = Guid.NewGuid().ToString();
+                            var uploadParams = new ImageUploadParams
+                            {
+                                File = new FileDescription(fileName, stream),
+                                Folder = folderName
+                            };
+                            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                            result.Add(file.FileName, uploadResult?.SecureUrl.AbsolutePath);
+                        }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             return result;
         }
@@ -45,6 +53,7 @@ namespace SchoolManagementAPI.Services.CloudinaryService
         {
             if (file.Length > 0)
             {
+
                 using (var stream = file.OpenReadStream())
                 {
                     string fileName = Guid.NewGuid().ToString();
@@ -54,7 +63,7 @@ namespace SchoolManagementAPI.Services.CloudinaryService
                         Folder = folderName
                     };
                     var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                    return (uploadResult.SecureUri).AbsoluteUri;
+                    return (uploadResult.SecureUrl).AbsoluteUri;
                 }
             }
             return null;

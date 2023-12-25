@@ -7,7 +7,7 @@
         public string CloudName { get; set; }
         public string APIKey { get; set; }
         public string APISecretKey { get; set; }
-        public string ClassSection { get; set; }
+        public string ClassSectionFolderName { get; set; }
         public string StudentFolderName { get; set; }
         public string LecturerFolderName { get; set; }
     }

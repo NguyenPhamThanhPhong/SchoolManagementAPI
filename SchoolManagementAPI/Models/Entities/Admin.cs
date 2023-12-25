@@ -9,6 +9,7 @@ namespace SchoolManagementAPI.Models.Entities
     {
         public Admin() : base()
         {
+            this.ID = Guid.NewGuid().ToString();
             this.Role = "admin";
         }
         public static string GetFieldName<T>(Expression<Func<Admin, T>> expression)

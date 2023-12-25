@@ -17,6 +17,5 @@ namespace SchoolManagementAPI.RequestResponse.Request
         [Required]
         public PersonalInformation? PersonalInfo { get; set; }
         public List<string>? Classes { get; set; }
-        //public Dictionary<string, ScheduleAggregation>? ScheduleAggregations { get; set; }
     }
 }

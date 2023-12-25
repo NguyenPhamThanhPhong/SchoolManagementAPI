@@ -72,6 +72,22 @@ namespace SchoolManagementAPI.Repositories.Repo
             return await _schoolClassCollection.Find(filter).FirstOrDefaultAsync();
         }
 
+        public async Task<bool> UpdatebyFilter(FilterDefinition<SchoolClass> filter, UpdateDefinition<SchoolClass> update,bool isMany)
+        {
+            try
+            {
+                if(!isMany)
+                    return (await _schoolClassCollection.UpdateOneAsync(filter, update)).ModifiedCount > 0;
+                else
+                    return (await _schoolClassCollection.UpdateManyAsync(filter, update)).ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating document: {ex.Message}");
+            }
+            return false;
+        }
+
         public async Task<bool> UpdatebyInstance(SchoolClass schoolClass)
         {
             var updateResult = await _schoolClassCollection.ReplaceOneAsync(s => s.ID == schoolClass.ID, schoolClass);
