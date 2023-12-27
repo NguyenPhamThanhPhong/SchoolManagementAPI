@@ -14,7 +14,7 @@ namespace SchoolManagementAPI.Models.Entities
         public string? Program { get; set; }
         public string? ClassType { get; set; }
         public Subject? Subject { get; set; }
-        public Semester? Semester { get; set; }
+        public string? SemesterId { get; set; }
         public DataLink? Lecturer { get; set; }
         public ClassSchedule? Schedule { get; set; }
         public List<StudentLog> StudentLogs { get; set; }

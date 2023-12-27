@@ -34,8 +34,8 @@ namespace SchoolManagementAPI.Controllers
             await _lecturerRepository.Create(lecturer);
             return Ok(lecturer);
         }
-        [HttpPost("/lecturer-login/")]
-        public async Task<IActionResult> Create([FromBody] LoginRequest request)
+        [HttpPost("/lecturer-login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -45,7 +45,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(lecturer);
         }
         [HttpGet("lecturer-get-password-in-mail/{username}")]
-        public async Task<IActionResult> Create(string username)
+        public async Task<IActionResult> RecoverPassword(string username)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -59,7 +59,7 @@ namespace SchoolManagementAPI.Controllers
 
             return Ok(isSent);
         }
-        [HttpGet("/lecturer-get-all/{start}/{end}")]
+        [HttpGet("/lecturer-get-many-range/{start}/{end}")]
         public async Task<IActionResult> ManyRange(int start, int end)
         {
             if (!ModelState.IsValid)

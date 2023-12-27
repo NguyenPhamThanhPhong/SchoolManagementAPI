@@ -45,7 +45,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(admin);
         }
         [HttpGet("/admin-get-password-in-mail/{username}")]
-        public async Task<IActionResult> Create(string username)
+        public async Task<IActionResult> RecoverPassword(string username)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

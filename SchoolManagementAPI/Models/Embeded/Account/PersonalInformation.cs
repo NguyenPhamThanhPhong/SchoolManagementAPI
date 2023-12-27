@@ -8,7 +8,7 @@ namespace SchoolManagementAPI.Models.Embeded.Account
         public string? Name { get; set; }
         public string? Gender { get; set; }
         public string? Phone { get; set; }
-        public string?  Faculty { get; set; }
+        public string?  FacultyId { get; set; }
         public string? Program { get; set; } // CLC hay đại trà
     }
 }

@@ -14,8 +14,8 @@ namespace SchoolManagementAPI.RequestResponse.Request
         public string? Program { get; set; }
         public string? ClassType { get; set; }
         [Required]
-        public Subject Subject { get; set; }
-        public Semester Semester { get; set; }
+        public string? SubjectId { get; set; }
+        public string? SemesterId { get; set; }
         public ClassSchedule? Schedule { get; set; }
         public List<StudentLog>? StudentLog { get; set; }
     }

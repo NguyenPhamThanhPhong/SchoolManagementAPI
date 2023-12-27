@@ -7,7 +7,7 @@ namespace SchoolManagementAPI.Models.Embeded.Account
 {
     public class CreditLog
     {
-        public Semester? Semester { get; set; }
+        public string? SemesterId { get; set; }
         public List<CreditLogSubject> Subjects { get; set; }
         public CreditLog() {
             Subjects = new List<CreditLogSubject>();

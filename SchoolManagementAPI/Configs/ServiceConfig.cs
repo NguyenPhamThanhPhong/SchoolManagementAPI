@@ -4,6 +4,7 @@ using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Services.SMTP;
 using SchoolManagementAPI.Services.CloudinaryService;
+using SchoolManagementAPI.Services.Converters;
 
 namespace SchoolManagementAPI.Configs
 {
@@ -39,6 +40,8 @@ namespace SchoolManagementAPI.Configs
             services.AddTransient<IStudentRepository, StudentRepository>();
             services.AddTransient<ISubjectRepository, SubjectRepository>();
             services.AddTransient<ISchoolClassRepository, SchoolClassRepository>();
+            services.AddTransient<IFacultyRepository,FacultyRepository>();
+            services.AddTransient<ISemesterRepository,SemesterRepository>();
             return services;
         }
         public static IServiceCollection ConfigAuthentication(this IServiceCollection services, IConfiguration config)
@@ -63,6 +66,7 @@ namespace SchoolManagementAPI.Configs
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Converters.Add(new DateTimeConverter("dd/MM/yyyy"));
             });
             //Allow all hosts
             services.AddCors(options =>

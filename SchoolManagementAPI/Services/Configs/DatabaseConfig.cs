@@ -13,7 +13,8 @@ namespace SchoolManagementAPI.Services.Configs
         public string SubjectCollectionName { get; set; }
         public string LecturerCollectionName { get; set; }
         public string AdminCollectionName { get; set; }
-        public string CategoryCollectionName { get; set; }
+        public string SemesterCollectionName { get; set; }
+        public string FacultyCollectionName { get; set; }
 
 
         public IMongoClient MongoClient { get; set; }
@@ -25,7 +26,8 @@ namespace SchoolManagementAPI.Services.Configs
         public IMongoCollection<Lecturer> LecturerCollection { get; set; }
         public IMongoCollection<Student> StudentCollection { get; set; }
 
-        public IMongoCollection<Category> CategoryCollection { get; set; }
+        public IMongoCollection<Semester> SemesterCollection { get; set; }
+        public IMongoCollection<Faculty> FacultyCollection { get; set; }
 
         public void SetUpDatabase()
         {
@@ -47,16 +49,24 @@ namespace SchoolManagementAPI.Services.Configs
             StudentCollection = MongoDatabase.GetCollection<Student>(StudentCollectionName);
                         
 
-            CategoryCollection = MongoDatabase.GetCollection<Category>(CategoryCollectionName);
+            SemesterCollection = MongoDatabase.GetCollection<Semester>(SemesterCollectionName);
+            FacultyCollection = MongoDatabase.GetCollection<Faculty>(FacultyCollectionName);
         }
 
         private void CreateUniqueIndex()
         {
-            var indexKeysDefinition = Builders<Student>
+            var studentIndexKeysDefinition = Builders<Student>
                 .IndexKeys.Ascending(Student.GetFieldName(u => u.Username));
+            var lecturerIndexKeysDefinition = Builders<Lecturer>
+                .IndexKeys.Ascending(Lecturer.GetFieldName(u => u.Username));
+            var adminIndexKeysDefinition = Builders<Admin>
+                .IndexKeys.Ascending(Admin.GetFieldName(u => u.Username));
             var indexOptions = new CreateIndexOptions { Unique = true };
 
-            StudentCollection.Indexes.CreateOne(new CreateIndexModel<Student>(indexKeysDefinition, indexOptions));
+            StudentCollection.Indexes.CreateOne(new CreateIndexModel<Student>(studentIndexKeysDefinition, indexOptions));
+            LecturerCollection.Indexes.CreateOne(new CreateIndexModel<Lecturer>(lecturerIndexKeysDefinition, indexOptions));
+            AdminCollection.Indexes.CreateOne(new CreateIndexModel<Admin>(adminIndexKeysDefinition, indexOptions));
+
         }
     }
 }
