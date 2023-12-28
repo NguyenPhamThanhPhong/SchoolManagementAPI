@@ -67,7 +67,7 @@ namespace SchoolManagementAPI.Controllers
             var students = await _studentRepository.GetManyRange(start, end);
             return Ok(students);
         }
-        [HttpPost("/student-get-from-ids")]
+        [HttpPost("/student-get-many-from-ids")]
         public async Task<IActionResult> GetFromIds([FromBody] List<string> ids)
         {
             if (!ModelState.IsValid)
@@ -101,11 +101,11 @@ namespace SchoolManagementAPI.Controllers
             return Ok(isUpdated);
         }
         [HttpPost("/student-update-instance")]
-        public async Task<IActionResult> UpdateStringFields(string id, [FromBody] Student student)
+        public async Task<IActionResult> UpdateStringFields([FromBody] Student student)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var isUpdated = await _studentRepository.UpdatebyInstance(id,student);
+            var isUpdated = await _studentRepository.UpdatebyInstance(student.ID,student);
             if (!isUpdated)
                 return BadRequest(isUpdated);
             return Ok(student);
