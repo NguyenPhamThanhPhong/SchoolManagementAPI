@@ -53,7 +53,7 @@ namespace SchoolManagementAPI.Controllers
             await _subjectRepository.UpdatebyInstance(subject);
             return Ok(subject);
         }
-        [HttpDelete("/delete-subject")]
+        [HttpDelete("/subject-delete/{id}")]
         public async Task<IActionResult> Delete( string id)
         {
             if (!ModelState.IsValid)

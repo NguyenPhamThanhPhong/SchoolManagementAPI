@@ -12,7 +12,7 @@ namespace SchoolManagementAPI.Models.Entities
         public string? Name { get; set; }
         public string? PrequisiteId { get; set; }
         public string? PreviousSubjectId { get; set; }
-        public List<string> ClassIds { get; set; }
+        public List<string>? ClassIds { get; set; }
         public static string GetFieldName<T>(Expression<Func<Subject, T>> expression)
         {
             var memberExpression = expression.Body as MemberExpression;

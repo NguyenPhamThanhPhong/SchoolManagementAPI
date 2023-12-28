@@ -4,6 +4,7 @@ using SchoolManagementAPI.Models.Enum;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.Configs;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Repositories.Repo
 {
@@ -18,6 +19,7 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public Task Create(Subject subject)
         {
+            Console.WriteLine(JsonSerializer.Serialize(subject));
             return _subjectCollection.InsertOneAsync(subject);
         }
 

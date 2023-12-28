@@ -24,7 +24,7 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public async Task<Student?> Delete(string id)
         {
-            var deleteResult = await _studentCollection.FindOneAndDeleteAsync(id);
+            var deleteResult = await _studentCollection.FindOneAndDeleteAsync(s=>s.ID==id);
             return deleteResult;
         }
 
