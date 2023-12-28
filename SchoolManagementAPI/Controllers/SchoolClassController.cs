@@ -48,7 +48,7 @@ namespace SchoolManagementAPI.Controllers
             await _schoolClassRepository.UpdatebyInstance(schoolClass);
             return Ok(schoolClass);
         }
-        [HttpPost("/class-student-registration-action/{id}/{action}")]
+        [HttpPost("/class-student-registration/{id}/{action}")]
         public async Task<IActionResult> UpdateStudentRegistration(string id, UpdateOption option, [FromBody] StudentLog studentLog)
         {
             if (!ModelState.IsValid)
@@ -71,7 +71,7 @@ namespace SchoolManagementAPI.Controllers
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
         }
-        [HttpGet("/get-single/{id}")]
+        [HttpGet("/class-get-by-id/{id}")]
         public async Task<IActionResult> GetOne(string id)
         {
             var schoolclass = await _schoolClassRepository.GetSingle(id);
@@ -98,7 +98,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(classes);
         }
         [HttpPost("/class-update-schedule/{id}")]
-        public async Task<IActionResult> SetSchedule(string id, [FromForm] ClassSchedule schedulePiece)
+        public async Task<IActionResult> UpdateSchedule(string id, [FromForm] ClassSchedule schedulePiece)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

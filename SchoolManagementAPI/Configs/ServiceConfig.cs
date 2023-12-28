@@ -29,6 +29,7 @@ namespace SchoolManagementAPI.Configs
         {
             DatabaseConfig databaseConfig = new DatabaseConfig();
             config.Bind("DatabaseInfo", databaseConfig);
+            Console.WriteLine(databaseConfig.MyConnectionString);
             databaseConfig.SetUpDatabase();
             services.AddSingleton(databaseConfig);
             return services;

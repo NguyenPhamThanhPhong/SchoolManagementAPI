@@ -6,7 +6,8 @@ namespace SchoolManagementAPI.Services.Configs
 {
     public class DatabaseConfig
     {
-        public string ConnectionString { get; set; }
+        public string MyConnectionString { get; set; }
+        public string tempfield { get; set; }
         public string DatabaseName { get; set; }
         public string StudentCollectionName { get; set; }
         public string SchoolClassCollectionName { get; set; }
@@ -31,12 +32,14 @@ namespace SchoolManagementAPI.Services.Configs
 
         public void SetUpDatabase()
         {
+            Console.WriteLine(MyConnectionString);
             InstantiateCollections();
             CreateUniqueIndex();
         }
         private void InstantiateCollections()
         {
-            MongoClient = new MongoClient(ConnectionString);
+            MongoClient = new MongoClient(MyConnectionString);
+
             MongoDatabase = MongoClient.GetDatabase(DatabaseName);
 
             SchoolClassCollection = MongoDatabase.GetCollection<SchoolClass>(SchoolClassCollectionName);

@@ -29,7 +29,7 @@ namespace SchoolManagementAPI.Controllers
             await _subjectRepository.Create(subject);
             return Ok(subject);
         }
-        [HttpGet("/subject-view/{start}/{end}")]
+        [HttpGet("/subject-get-many-range/{start}/{end}")]
         public async Task<IActionResult> GetManyRange(int start, int end)
         {
             if (!ModelState.IsValid)
@@ -37,8 +37,8 @@ namespace SchoolManagementAPI.Controllers
             var subjects = await _subjectRepository.GetManyRange(start, end);
             return Ok(subjects);
         }
-        [HttpGet("/subject-view/{id}")]
-        public async Task<IActionResult> GetManyRange(string id)
+        [HttpGet("/subject-get-by-id/{id}")]
+        public async Task<IActionResult> GetbyId(string id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
