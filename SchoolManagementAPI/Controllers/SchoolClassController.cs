@@ -84,7 +84,7 @@ namespace SchoolManagementAPI.Controllers
             var schoolclass = await _schoolClassRepository.GetSingle(id);
             if (schoolclass != null)
                 return Ok(schoolclass);
-            return BadRequest("false");
+            return Ok(schoolclass);
         }
         [HttpPost("/class-get-by-filter")]
         public async Task<IActionResult> GetFilter([FromForm] string textFilter)
