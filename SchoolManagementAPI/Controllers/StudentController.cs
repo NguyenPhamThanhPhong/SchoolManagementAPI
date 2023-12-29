@@ -34,6 +34,14 @@ namespace SchoolManagementAPI.Controllers
             await _studentRepository.Create(student);
             return Ok(student);
         }
+        [HttpGet("/student-get-by-id/{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var student = await _studentRepository.GetbyId(id);
+            return Ok(student);
+        }
         [HttpPost("/student-login/")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {

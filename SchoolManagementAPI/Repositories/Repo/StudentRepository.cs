@@ -28,6 +28,11 @@ namespace SchoolManagementAPI.Repositories.Repo
             return deleteResult;
         }
 
+        public async Task<Student?> GetbyId(string id)
+        {
+            return await _studentCollection.Find(s => s.ID == id).FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<Student>> GetbyTextFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);

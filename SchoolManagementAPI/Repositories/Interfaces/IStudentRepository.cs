@@ -9,6 +9,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task<Student?> Delete(string id);
 
         public Task<Student?> GetbyUsername(string username);
+        public Task<Student?> GetbyId(string id);
         public Task<IEnumerable<Student>> GetbyTextFilter(string textFilter);
         public Task<IEnumerable<Student>> GetManyRange(int start, int end);
         public Task<IEnumerable<Student>> GetManyfromIds(List<string> ids);

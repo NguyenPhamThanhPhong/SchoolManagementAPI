@@ -10,5 +10,6 @@
         public string ClassSectionFolderName { get; set; }
         public string StudentFolderName { get; set; }
         public string LecturerFolderName { get; set; }
+        public string PostFolderName { get; set; }
     }
 }

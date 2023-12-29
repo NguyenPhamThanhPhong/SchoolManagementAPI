@@ -1,5 +1,6 @@
 ﻿namespace SchoolManagementAPI.RequestResponse.Request
 {
+#pragma warning disable
     public class AccountCreateRequest
     {
         public string Username { get; set; }

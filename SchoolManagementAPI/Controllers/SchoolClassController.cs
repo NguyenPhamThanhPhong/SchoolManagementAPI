@@ -64,9 +64,16 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpDelete("/class-delete/{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, [FromBody] List<string> prevUrls)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             var deleteResult = await _schoolClassRepository.Delete(id);
+
+            if (prevUrls != null)
+                foreach (var url in prevUrls)
+                    await _cloudinaryHandler.Delete(url);
+
             if (deleteResult)
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
@@ -79,7 +86,7 @@ namespace SchoolManagementAPI.Controllers
                 return Ok(schoolclass);
             return BadRequest("false");
         }
-        [HttpPost("/get-filter")]
+        [HttpPost("/class-get-by-filter")]
         public async Task<IActionResult> GetFilter([FromForm] string textFilter)
         {
             var schoolClasses = await _schoolClassRepository.GetbyTextFilter(textFilter);
@@ -91,7 +98,7 @@ namespace SchoolManagementAPI.Controllers
             var classes = await _schoolClassRepository.GetManyRange(start, end);
             return Ok(classes);
         }
-        [HttpPost("/class-get-from-ids/")]
+        [HttpPost("/class-get-many-from-ids/")]
         public async Task<IActionResult> GetfromIds(List<string> ids)
         {
             var classes = await _schoolClassRepository.GetfromIds(ids);
@@ -109,6 +116,8 @@ namespace SchoolManagementAPI.Controllers
                 option = UpdateOption.set
             };
             var isUpdated = await _schoolClassRepository.UpdateByParameters(id, new List<UpdateParameter> { paramter });
+
+
             return Ok(isUpdated);
         }
         [HttpPost("/class-append-sections/{id}/{position}/{updateOption}")]
