@@ -166,6 +166,5 @@ namespace SchoolManagementAPI.Controllers
             }
             return Ok(isUpdated);
         }
-
     }
 }

@@ -65,7 +65,10 @@ namespace SchoolManagementAPI.Configs
             services.AddSingleton<EmailUtil>();
 
             //JSON serializing option
-            services.AddControllers().AddJsonOptions(options =>
+            services.AddControllers(options =>
+            {
+                options.ModelBinderProviders.Insert(0, new TimeSpanModelBinderProvider());
+            }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.Converters.Add(new DateTimeConverter("dd/MM/yyyy"));
