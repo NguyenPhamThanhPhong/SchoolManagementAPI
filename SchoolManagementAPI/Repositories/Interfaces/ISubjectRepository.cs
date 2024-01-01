@@ -8,6 +8,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task Create(Subject subject);
 
         public Task<Subject?> GetOne(string id);
+        public Task<IEnumerable<Subject>> GetFromIds(IEnumerable<string> ids);
         public Task<IEnumerable<Subject>> GetManyRange(int start,int end);
 
         public Task<bool> UpdatebyParameters(string id,IEnumerable<UpdateParameter> parameters);

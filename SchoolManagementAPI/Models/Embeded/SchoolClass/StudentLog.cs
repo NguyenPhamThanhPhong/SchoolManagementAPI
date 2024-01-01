@@ -1,15 +1,16 @@
-﻿namespace SchoolManagementAPI.Models.Embeded.SchoolClass
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace SchoolManagementAPI.Models.Embeded.SchoolClass
 {
 #pragma warning disable CS8618
+    [BsonIgnoreExtraElements]
     public class StudentLog
     {
         public string ID { get; set; }
-        public string Name { get; set; }
-        public List<Score> Scores { get; set; }
+        public List<int> Scores { get; set; }
         public StudentLog()
         {
-            Scores = new List<Score>();
-
+            Scores = new List<int>();
         }
     }
 
@@ -17,10 +18,5 @@
     {
         public DateTime Time { get; set; }
         public bool IsPresent { get; set; }
-    }
-    public class Score
-    {
-        public int ExamOrder { get; set; }
-        public float Grade { get; set; }
     }
 }

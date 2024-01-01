@@ -11,16 +11,20 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class SubjectRepository : ISubjectRepository
     {
         private readonly IMongoCollection<Subject> _subjectCollection;
+        private readonly IMongoCollection<Faculty> _facultyCollection;
 
         public SubjectRepository(DatabaseConfig databaseConfig)
         {
             _subjectCollection = databaseConfig.SubjectCollection;
+            _facultyCollection = databaseConfig.FacultyCollection;
         }
 
-        public Task Create(Subject subject)
+        public async Task Create(Subject subject)
         {
-            Console.WriteLine(JsonSerializer.Serialize(subject));
-            return _subjectCollection.InsertOneAsync(subject);
+            await _subjectCollection.InsertOneAsync(subject);
+            var filter = Builders<Faculty>.Filter.Eq(f => f.ID, subject.FacultyId);
+            var update = Builders<Faculty>.Update.Push(f => f.SubjectIds, subject.ID);
+            await _facultyCollection.UpdateOneAsync(filter, update);
         }
 
         public Task DeleteMany(IEnumerable<string> ids)
@@ -35,6 +39,12 @@ namespace SchoolManagementAPI.Repositories.Repo
             return _subjectCollection.DeleteOneAsync(filter);
         }
 
+        public async Task<IEnumerable<Subject>> GetFromIds(IEnumerable<string> ids)
+        {
+            var filter = Builders<Subject>.Filter.In(s => s.ID, ids);
+            return await _subjectCollection.Find(filter).ToListAsync();
+        }
+
         public async Task<IEnumerable<Subject>> GetManyRange(int start, int end)
         {
             return await _subjectCollection.Find(_ => true).Skip(start).Limit(start-end).ToListAsync();
@@ -44,6 +54,7 @@ namespace SchoolManagementAPI.Repositories.Repo
         {
             return await _subjectCollection.Find(s=>s.ID == id).FirstOrDefaultAsync();
         }
+        
 
         public async Task<bool> UpdatebyInstance(Subject subject)
         {

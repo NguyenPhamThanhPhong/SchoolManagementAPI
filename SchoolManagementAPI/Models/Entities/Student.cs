@@ -1,19 +1,19 @@
-﻿using SchoolManagementAPI.Models.Abstracts;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using SchoolManagementAPI.Models.Abstracts;
 using SchoolManagementAPI.Models.Embeded.Account;
 using System.Linq.Expressions;
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
     public class Student : SchoolMember
     {
-        public CreditLog CreditInfo { get; set; }
-        public string? Programs { get; set; }
+        Dictionary<string,List<CreditLog>> creditLogs;
 
         public Student(): base()
         {
             Role = "student";
-            this.CreditInfo = new CreditLog();
-
+            creditLogs = new Dictionary<string, List<CreditLog>>();
         }
         public static string GetFieldName<T>(Expression<Func<Student, T>> expression)
         {

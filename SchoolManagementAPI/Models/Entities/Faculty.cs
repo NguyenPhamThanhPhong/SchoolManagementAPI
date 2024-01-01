@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
+
     public class Faculty
     {
         [BsonId]
@@ -10,5 +12,14 @@ namespace SchoolManagementAPI.Models.Entities
         [Required]
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public List<string> SubjectIds { get; set; }
+        public List<string> PostIds { get; set; }
+
+        public Faculty()
+        {
+            SubjectIds = new List<string>();
+            PostIds = new List<string>();
+        }
+
     }
 }

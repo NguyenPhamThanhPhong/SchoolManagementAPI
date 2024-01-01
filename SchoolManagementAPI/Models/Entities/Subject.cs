@@ -5,14 +5,22 @@ using System.Linq.Expressions;
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
     public class Subject
     {
         [BsonId]
         public string ID { get; set; } = "";
         public string? Name { get; set; }
-        public string? PrequisiteId { get; set; }
-        public string? PreviousSubjectId { get; set; }
+        public List<string>? PrequisiteIds { get; set; }
+        public List<string>? PreviousSubjectIds { get; set; }
+        public string? FacultyId { get; set; }
         public List<string>? ClassIds { get; set; }
+        public Subject()
+        {
+            ClassIds = new List<string>();
+            PrequisiteIds = new List<string>();
+            PreviousSubjectIds = new List<string>();
+        }
         public static string GetFieldName<T>(Expression<Func<Subject, T>> expression)
         {
             var memberExpression = expression.Body as MemberExpression;

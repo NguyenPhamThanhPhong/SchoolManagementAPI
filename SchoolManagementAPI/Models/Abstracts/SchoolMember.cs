@@ -1,5 +1,6 @@
 ﻿using SchoolManagementAPI.Models.Embeded.Account;
 using SchoolManagementAPI.Models.Embeded.ReuseTypes;
+using SchoolManagementAPI.Models.Embeded.SchoolClass;
 using SchoolManagementAPI.Models.Entities;
 using System.Linq.Expressions;
 
@@ -9,13 +10,13 @@ namespace SchoolManagementAPI.Models.Abstracts
     {
         public PersonalInformation PersonalInfo { get; set; }
         public List<string> Classes { get; set; }
-        public Dictionary<string,ScheduleAggregation> ScheduleAggregations { get; set; } 
+        public Dictionary<string,List<ClassSchedule>> ScheduleAggregations { get; set; } 
         // string: ID của semester
 
         public SchoolMember() {
             PersonalInfo = new PersonalInformation();
             Classes = new List<string>();
-            ScheduleAggregations = new Dictionary<string,ScheduleAggregation>();
+            ScheduleAggregations = new Dictionary<string, List<ClassSchedule>>();
         }
         public static string GetFieldName<T>(Expression<Func<SchoolMember, T>> expression)
         {

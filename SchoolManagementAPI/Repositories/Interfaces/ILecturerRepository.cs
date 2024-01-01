@@ -1,4 +1,5 @@
-﻿using SchoolManagementAPI.Models.Entities;
+﻿using MongoDB.Driver;
+using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.RequestResponse.Request;
 
 namespace SchoolManagementAPI.Repositories.Interfaces
@@ -10,12 +11,14 @@ namespace SchoolManagementAPI.Repositories.Interfaces
 
 
         public Task<Lecturer?> GetbyUsername(string username);
-        public Task<Lecturer?> GetbyTextFilter(string textFilter);
+        public Task<IEnumerable<Lecturer>> GetbyTextFilter(string textFilter);
         public Task<IEnumerable<Lecturer>> GetManyfromIds(List<string> ids);
+        public Task<Lecturer?> GetFromId(string id);
         public Task<IEnumerable<Lecturer>> GetManyRange(int start, int end);
 
         public Task<bool> UpdatebyParameters(string id, List<UpdateParameter> parameters);
         public Task<bool> UpdatebyInstance(Lecturer instance);
         public Task<bool> UpdateStringFields(string id, List<UpdateParameter> parameters);
+        public Task UpdatebyFilter(FilterDefinition<Lecturer> filter, UpdateDefinition<Lecturer> update, bool isMany);
     }
 }

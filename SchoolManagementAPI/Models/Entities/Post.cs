@@ -2,6 +2,7 @@
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
     public class Post
     {
         [BsonId]

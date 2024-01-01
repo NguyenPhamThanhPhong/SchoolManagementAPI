@@ -8,6 +8,8 @@ using System.Linq.Expressions;
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
+
     public class Lecturer : SchoolMember
     {
 

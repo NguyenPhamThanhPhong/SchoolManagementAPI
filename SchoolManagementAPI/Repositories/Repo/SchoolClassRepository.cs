@@ -14,37 +14,46 @@ namespace SchoolManagementAPI.Repositories.Repo
         private readonly IMongoCollection<SchoolClass> _schoolClassCollection;
         private readonly IMongoCollection<Student> _studentCollection;
         private readonly IMongoCollection<Lecturer> _lecturerCollection;
+        private readonly IMongoCollection<Semester> _semesterCollection;
 
         public SchoolClassRepository(DatabaseConfig databaseConfig)
         {
             _schoolClassCollection = databaseConfig.SchoolClassCollection;
             _studentCollection = databaseConfig.StudentCollection;
             _lecturerCollection = databaseConfig.LecturerCollection;
+            _semesterCollection = databaseConfig.SemesterCollection;
         }
 
         public async Task Create(SchoolClass schoolClass)
         {
             await _schoolClassCollection.InsertOneAsync(schoolClass);
-            var filter = Builders<Student>.Filter.In(u=>u.ID, schoolClass.StudentLogs.Select(s => s.ID).ToList());
+
+            var filterStudent = Builders<Student>.Filter.In(u=>u.ID, schoolClass.StudentLogs.Select(s => s.ID).ToList());
             var updateStudent = Builders<Student>.Update.Push(s=>s.Classes, schoolClass.ID);
+
             var filterLecturer = Builders<Lecturer>.Filter.Eq(u => u.ID, schoolClass.Lecturer?.ID);
             var updateLecturer = Builders<Lecturer>.Update.Push(s => s.Classes, schoolClass.ID);
-            Task student = _studentCollection.UpdateManyAsync(filter,updateStudent);
+
+            var filterSemester = Builders<Semester>.Filter.Eq(s => s.ID, schoolClass.SemesterId);
+            var updateSemester = Builders<Semester>.Update.Push(s => s.ClassIds, schoolClass.ID);
+
+            Task student = _studentCollection.UpdateManyAsync(filterStudent, updateStudent);
             Task lecturer = _lecturerCollection.UpdateOneAsync(filterLecturer, updateLecturer);
-            await Task.WhenAll(student, lecturer);
+            Task semester = _semesterCollection.UpdateOneAsync(filterSemester,updateSemester);
+            await Task.WhenAll(student, lecturer,semester);
         }
 
         public async Task<bool> Delete(string id)
         {
-            var schoolClass = await _schoolClassCollection.FindOneAndDeleteAsync(s=>s.ID == id);
-            var filter = Builders<Student>.Filter.In(u => u.ID, schoolClass.StudentLogs.Select(s => s.ID).ToList());
-            var updateStudent = Builders<Student>.Update.Push(s => s.Classes, schoolClass.ID);
-            var filterLecturer = Builders<Lecturer>.Filter.Eq(u => u.ID, schoolClass.Lecturer?.ID);
-            var updateLecturer = Builders<Lecturer>.Update.Push(s => s.Classes, schoolClass.ID);
-            Task student = _studentCollection.UpdateManyAsync(filter, updateStudent);
-            Task lecturer = _lecturerCollection.UpdateOneAsync(filterLecturer, updateLecturer);
-            await Task.WhenAll(student, lecturer);
-            return schoolClass != null;
+            var result = await _schoolClassCollection.DeleteOneAsync(s=>s.ID== id);
+            //var filter = Builders<Student>.Filter.In(u => u.ID, schoolClass.StudentLogs.Select(s => s.ID).ToList());
+            //var updateStudent = Builders<Student>.Update.Push(s => s.Classes, schoolClass.ID);
+            //var filterLecturer = Builders<Lecturer>.Filter.Eq(u => u.ID, schoolClass.Lecturer?.ID);
+            //var updateLecturer = Builders<Lecturer>.Update.Push(s => s.Classes, schoolClass.ID);
+            //Task student = _studentCollection.UpdateManyAsync(filter, updateStudent);
+            //Task lecturer = _lecturerCollection.UpdateOneAsync(filterLecturer, updateLecturer);
+            //await Task.WhenAll(student, lecturer);
+            return result.DeletedCount > 0;
         }
 
         public async Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter)
@@ -57,7 +66,6 @@ namespace SchoolManagementAPI.Repositories.Repo
         {
             var filter = Builders<SchoolClass>.Filter.In(s=>s.ID, ids);
             return await _schoolClassCollection.Find(filter).ToListAsync();
-
         }
 
         public async Task<IEnumerable<SchoolClass>> GetManyRange(int start, int end)

@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using SchoolManagementAPI.Models.Embeded.ReuseTypes;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 
@@ -45,12 +47,22 @@ namespace SchoolManagementAPI.Controllers
             var subject = await _subjectRepository.GetOne(id);
             return Ok(subject);
         }
-        [HttpPost("/subject-update-instance")]
-        public async Task<IActionResult> UpdateInstance( [FromBody] Subject subject)
+        [HttpPost("/subject-update-instance/{prevName}")]
+        public async Task<IActionResult> UpdateInstance(string prevName, [FromBody] Subject subject)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            await _subjectRepository.UpdatebyInstance(subject);
+            Task? updateSubject = _subjectRepository.UpdatebyInstance(subject);
+            Task? myTask = Task.Run(async () =>
+            {
+                if (prevName != subject.Name)
+                {
+                    var filter = Builders<SchoolClass>.Filter.In(s => s.ID, subject.ClassIds);
+                    var update = Builders<SchoolClass>.Update.Set(s => s.Subject, new DataLink { ID = subject.ID, Name = subject.Name });
+                    await _schoolClassRepository.UpdatebyFilter(filter, update, true);
+                }
+            });
+            await Task.WhenAll(updateSubject,myTask);
             return Ok(subject);
         }
         [HttpDelete("/subject-delete/{id}")]
@@ -61,7 +73,6 @@ namespace SchoolManagementAPI.Controllers
             await _subjectRepository.DeleteOne(id);
             return Ok("deleted");
         }
-
 
     }
 }

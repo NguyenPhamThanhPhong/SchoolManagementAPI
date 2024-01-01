@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 
 namespace SchoolManagementAPI.Models.Entities
 {
+    [BsonIgnoreExtraElements]
     public class SchoolClass
     {
         [BsonId]
@@ -13,19 +14,19 @@ namespace SchoolManagementAPI.Models.Entities
         public string? RoomName { get; set; }
         public string? Program { get; set; }
         public string? ClassType { get; set; }
-        public DataLink? Subject { get; set; }
         public string? SemesterId { get; set; }
+        public DataLink? Subject { get; set; }
         public DataLink? Lecturer { get; set; }
         public ClassSchedule? Schedule { get; set; }
         public List<StudentLog> StudentLogs { get; set; }
-        public List<ExamMileStone> Exam { get; set; }
+        public List<ExamMileStone> Exams { get; set; }
         public List<Section> Sections { get; set; }
 
         public SchoolClass()
         {
             ID = String.Empty;
             StudentLogs = new List<StudentLog>();
-            Exam = new List<ExamMileStone>();
+            Exams = new List<ExamMileStone>();
             Sections = new List<Section>();
         }
         public static string GetFieldName<T>(Expression<Func<SchoolClass, T>> expression)

@@ -35,17 +35,23 @@ namespace SchoolManagementAPI.Repositories.Repo
             return deleteResult;
         }
 
-        public async Task<Lecturer?> GetbyTextFilter(string textFilter)
+        public async Task<IEnumerable<Lecturer>> GetbyTextFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);
-            var lecturer = await _lecturerCollection.Find(filter).FirstOrDefaultAsync();
-            return lecturer;
+            var lecturers = await _lecturerCollection.Find(filter).ToListAsync();
+            return lecturers;
         }
 
         public async Task<Lecturer?> GetbyUsername(string username)
         {
             var filter = Builders<Lecturer>.Filter.Eq(l=>l.Username, username);
             return await  _lecturerCollection.Find(filter).FirstOrDefaultAsync();
+        }
+
+        public async Task<Lecturer?> GetFromId(string id)
+        {
+            var filter = Builders<Lecturer>.Filter.Eq(l => l.ID, id);
+            return await _lecturerCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Lecturer>> GetManyfromIds(List<string> ids)
@@ -57,6 +63,14 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Lecturer>> GetManyRange(int start, int end)
         {
             return await _lecturerCollection.Find(_ => true).Skip(start).Limit(end - start).ToListAsync();
+        }
+
+        public Task UpdatebyFilter(FilterDefinition<Lecturer> filter, UpdateDefinition<Lecturer> update,bool isMany)
+        {
+            if(isMany)
+                return _lecturerCollection.UpdateManyAsync(filter, update);
+            else
+                return _lecturerCollection.UpdateOneAsync(filter, update);
         }
 
         public async Task<bool> UpdatebyInstance(Lecturer instance)

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using SchoolManagementAPI.Models.Embeded.ReuseTypes;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
@@ -17,13 +18,15 @@ namespace SchoolManagementAPI.Controllers
         private readonly ILecturerRepository _lecturerRepository;
         private readonly IMapper _mapper;
         private readonly EmailUtil _emailUtil;
+        private readonly ISchoolClassRepository _schoolClassRepository;
 
 
-        public LecturerController(ILecturerRepository lecturerRepository, IMapper mapper, EmailUtil emailUtil)
+        public LecturerController(ILecturerRepository lecturerRepository, IMapper mapper, EmailUtil emailUtil, ISchoolClassRepository schoolClassRepository)
         {
             _lecturerRepository = lecturerRepository;
             _mapper = mapper;
             _emailUtil = emailUtil;
+            _schoolClassRepository = schoolClassRepository;
         }
         [HttpPost("/lecturer-create")]
         public async Task<IActionResult> Create([FromBody] SchoolMemberCreateRequest request)
@@ -99,12 +102,19 @@ namespace SchoolManagementAPI.Controllers
             var isUpdated = await _lecturerRepository.UpdateStringFields(id, paramters);
             return Ok(isUpdated);
         }
-        [HttpPost("/lecturer-update-instance")]
-        public async Task<IActionResult> UpdateStringFields(string id, [FromBody] Lecturer lecturer)
+        [HttpPost("/lecturer-update-instance/{id}/{prevName}")]
+        public async Task<IActionResult> UpdateStringFields(string id,string? prevName, [FromBody] Lecturer lecturer)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var isUpdated = await _lecturerRepository.UpdatebyInstance(lecturer);
+            if(prevName!=lecturer.PersonalInfo.Name)
+            {
+                var filter = Builders<SchoolClass>.Filter.In(c=>c.ID,lecturer.Classes);
+                var update = Builders<SchoolClass>.Update.Set(c => c.Lecturer.Name, lecturer.PersonalInfo.Name);
+                await _schoolClassRepository.UpdatebyFilter(filter, update,true);
+            }
+
             if (!isUpdated)
                 return BadRequest(isUpdated);
             return Ok(lecturer);

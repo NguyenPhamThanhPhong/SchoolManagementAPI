@@ -23,7 +23,7 @@ namespace SchoolManagementAPI.Controllers
             var semesters = await _semesterRepository.GetAll();
             return Ok(semesters);
         }
-        [HttpGet("/semester/{id}")]
+        [HttpGet("/semester-get-by-id/{id}")]
         public async Task<IActionResult> GetOne(string id)
         {
             if (!ModelState.IsValid)
