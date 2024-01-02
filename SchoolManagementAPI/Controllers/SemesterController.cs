@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
+using SchoolManagementAPI.Services.Configs;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -10,10 +12,12 @@ namespace SchoolManagementAPI.Controllers
     public class SemesterController : ControllerBase
     {
         private readonly ISemesterRepository _semesterRepository;
+        private readonly IMongoCollection<Semester> _semesterCollection;    
 
-        public SemesterController(ISemesterRepository semesterRepository)
+        public SemesterController(ISemesterRepository semesterRepository,DatabaseConfig databaseConfig)
         {
             _semesterRepository = semesterRepository;
+            _semesterCollection = databaseConfig.SemesterCollection;
         }
         [HttpGet("/semester-get-all")]
         public async Task<IActionResult> GetAll()
@@ -34,11 +38,21 @@ namespace SchoolManagementAPI.Controllers
         [HttpPost("/semester-create")]
         public async Task<IActionResult> Create([FromBody] Semester semester)
         {
+            Console.WriteLine(semester.StartTime.ToString("dd/MM/yyyy"));
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             await _semesterRepository.Create(semester);
             return Ok(semester);
         }
+        [HttpPost("/semester-auto-generate")]
+        public async Task<IActionResult> AutoGenerate([FromBody] List<Semester> semesters)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            await _semesterCollection.InsertManyAsync(semesters);
+            return Ok(semesters);
+        }
+
         [HttpPost("/semester-update")]
         public async Task<IActionResult> Update([FromBody] Semester semester)
         {

@@ -12,6 +12,7 @@ namespace SchoolManagementAPI.Repositories.Repo
     {
         private readonly IMongoCollection<Subject> _subjectCollection;
         private readonly IMongoCollection<Faculty> _facultyCollection;
+        private readonly SortDefinition<Subject> _sortSubject = Builders<Subject>.Sort.Descending(s => s.ID);
 
         public SubjectRepository(DatabaseConfig databaseConfig)
         {
@@ -42,12 +43,12 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Subject>> GetFromIds(IEnumerable<string> ids)
         {
             var filter = Builders<Subject>.Filter.In(s => s.ID, ids);
-            return await _subjectCollection.Find(filter).ToListAsync();
+            return await _subjectCollection.Find(filter).Sort(_sortSubject).ToListAsync();
         }
 
         public async Task<IEnumerable<Subject>> GetManyRange(int start, int end)
         {
-            return await _subjectCollection.Find(_ => true).Skip(start).Limit(start-end).ToListAsync();
+            return await _subjectCollection.Find(_ => true).Skip(start).Limit(start-end).Sort(_sortSubject).ToListAsync();
         }
 
         public async  Task<Subject?> GetOne(string id)

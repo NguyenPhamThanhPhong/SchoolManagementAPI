@@ -8,23 +8,26 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class FacultyRepository : IFacultyRepository
     {
         private readonly IMongoCollection<Faculty> _facultyCollection;
+        private readonly SortDefinition<Faculty> _facultySort;
         public FacultyRepository(DatabaseConfig databaseConfig)
         {
             _facultyCollection = databaseConfig.FacultyCollection;
+            _facultySort = Builders<Faculty>.Sort.Descending(s => s.ID);
         }
         public Task Create(Faculty faculty)
         {
             return _facultyCollection.InsertOneAsync(faculty);
         }
 
-        public Task Delete(string id)
+        public async Task<bool> Delete(string id)
         {
-            return _facultyCollection.DeleteOneAsync(id);
+            var deleteResult = await _facultyCollection.DeleteOneAsync(s=>s.ID==id); 
+            return deleteResult.DeletedCount > 0;
         }
 
         public async Task<IEnumerable<Faculty>> GetAll()
         {
-            return await _facultyCollection.Find(_ => true).ToListAsync(); 
+            return await _facultyCollection.Find(_ => true).Sort(_facultySort).ToListAsync();
         }
 
         public  Task<Faculty> GetOne(string id)

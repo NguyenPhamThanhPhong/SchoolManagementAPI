@@ -9,10 +9,12 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class PostRepository : IPostRepository
     {
         private readonly IMongoCollection<Post> _postCollection;
+        private readonly SortDefinition<Post> _sortPost;
 
         public PostRepository(DatabaseConfig databaseConfig)
         {
             _postCollection = databaseConfig.PostCollection;
+            _sortPost = Builders<Post>.Sort.Descending(s => s.ID);
         }
 
         public Task Create(Post post)
@@ -29,12 +31,12 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Post>> GetbyFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);
-            return await _postCollection.Find(filter).ToListAsync();
+            return await _postCollection.Find(filter).Sort(_sortPost).ToListAsync();
         }
 
         public async Task<IEnumerable<Post>> GetManyRange(int start, int end)
         {
-            return await _postCollection.Find(_=>true).Skip(start).Limit(start-end).ToListAsync();
+            return await _postCollection.Find(_=>true).Skip(start).Limit(start-end).Sort(_sortPost).ToListAsync();
         }
 
         public Task<Post> GetOne(string id)

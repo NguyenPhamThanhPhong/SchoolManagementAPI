@@ -8,6 +8,6 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task<Faculty> GetOne(string id);
         public Task Create(Faculty faculty);
         public Task<bool> UpdatebyInstance(Faculty faculty);
-        public Task Delete(string id);
+        public Task<bool> Delete(string id);
     }
 }

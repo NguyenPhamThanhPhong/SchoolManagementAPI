@@ -8,9 +8,11 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class SemesterRepository : ISemesterRepository
     {
         private readonly IMongoCollection<Semester> _semesterCollection;
+        private readonly SortDefinition<Semester> _sortSemester;
         public SemesterRepository(DatabaseConfig databaseConfig)
         {
             _semesterCollection = databaseConfig.SemesterCollection;
+            _sortSemester = Builders<Semester>.Sort.Descending(s => s.ID);
         }
         public Task Create(Semester semester)
         {

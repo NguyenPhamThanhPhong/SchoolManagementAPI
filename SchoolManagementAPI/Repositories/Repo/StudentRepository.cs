@@ -11,6 +11,7 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class StudentRepository : IStudentRepository
     {
         private readonly IMongoCollection<Student> _studentCollection;
+        private readonly SortDefinition<Student> _sortStudent = Builders<Student>.Sort.Descending(s => s.ID);
 
         public StudentRepository(DatabaseConfig databaseConfigs)
         {
@@ -36,7 +37,7 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Student>> GetbyTextFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);
-            return await _studentCollection.Find(filter).ToListAsync();
+            return await _studentCollection.Find(filter).Sort(_sortStudent).ToListAsync();
         }
 
         public async Task<Student?> GetbyUsername(string username)
@@ -48,13 +49,13 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Student>> GetManyfromIds(List<string> ids)
         {
             var filter = Builders<Student>.Filter.In(s => s.ID, ids);
-            return await _studentCollection.Find(filter).ToListAsync();
+            return await _studentCollection.Find(filter).Sort(_sortStudent).ToListAsync();
         }
 
         public  async Task<IEnumerable<Student>> GetManyRange(int start, int end)
         {
             var sort = Builders<Student>.Sort.Descending(s => s.ID);
-            return await _studentCollection.Find(_ => true).Skip(start).Sort(sort).Limit(end - start).ToListAsync();
+            return await _studentCollection.Find(_ => true).Skip(start).Sort(sort).Limit(end - start).Sort(_sortStudent).ToListAsync();
         }
 
         public async Task<bool> UpdatebyInstance(string id, Student instance)

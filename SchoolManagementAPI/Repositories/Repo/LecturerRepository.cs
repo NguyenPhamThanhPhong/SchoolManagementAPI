@@ -14,10 +14,12 @@ namespace SchoolManagementAPI.Repositories.Repo
     {
         private readonly IMongoCollection<Lecturer> _lecturerCollection;
         private readonly FindOneAndUpdateOptions<Lecturer> _options;
+        private readonly SortDefinition<Lecturer> _sortLecturer;
 
         public LecturerRepository(DatabaseConfig databaseConfig )
         {
             _lecturerCollection = databaseConfig.LecturerCollection;
+            _sortLecturer = Builders<Lecturer>.Sort.Descending(s => s.ID);
             this._options = new FindOneAndUpdateOptions<Lecturer>()
             {
                 ReturnDocument = ReturnDocument.After
@@ -38,7 +40,7 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Lecturer>> GetbyTextFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);
-            var lecturers = await _lecturerCollection.Find(filter).ToListAsync();
+            var lecturers = await _lecturerCollection.Find(filter).Sort(_sortLecturer).ToListAsync();
             return lecturers;
         }
 
@@ -57,12 +59,12 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<IEnumerable<Lecturer>> GetManyfromIds(List<string> ids)
         {
             var filter = Builders<Lecturer>.Filter.In(l => l.ID, ids);
-            return await _lecturerCollection.Find(filter).ToListAsync();
+            return await _lecturerCollection.Find(filter).Sort(_sortLecturer).ToListAsync();
         }
 
         public async Task<IEnumerable<Lecturer>> GetManyRange(int start, int end)
         {
-            return await _lecturerCollection.Find(_ => true).Skip(start).Limit(end - start).ToListAsync();
+            return await _lecturerCollection.Find(_ => true).Skip(start).Limit(end - start).Sort(_sortLecturer).ToListAsync();
         }
 
         public Task UpdatebyFilter(FilterDefinition<Lecturer> filter, UpdateDefinition<Lecturer> update,bool isMany)

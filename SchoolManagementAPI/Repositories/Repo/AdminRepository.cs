@@ -10,9 +10,11 @@ namespace SchoolManagementAPI.Repositories.Repo
     public class AdminRepository : IAdminRepository
     {
         private readonly IMongoCollection<Admin> _adminCollection;
+        private readonly SortDefinition<Admin> _sortAdmin;
         public AdminRepository(DatabaseConfig databaseConfig)
         {
             _adminCollection = databaseConfig.AdminCollection;
+            _sortAdmin = Builders<Admin>.Sort.Descending(s => s.ID);
         }
         public Task Create(Admin lecturer)
         {
@@ -27,7 +29,7 @@ namespace SchoolManagementAPI.Repositories.Repo
 
         public async Task<IEnumerable<Admin>> GetAll()
         {
-            return await _adminCollection.Find(_ => true).ToListAsync();
+            return await _adminCollection.Find(_ => true).Sort(_sortAdmin).ToListAsync();
         }
 
         public async Task<Admin?> GetbyID(string id)

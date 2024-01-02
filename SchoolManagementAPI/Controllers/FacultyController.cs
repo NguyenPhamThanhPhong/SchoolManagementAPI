@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
+using SchoolManagementAPI.Services.Configs;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -10,10 +12,12 @@ namespace SchoolManagementAPI.Controllers
     public class FacultyController : ControllerBase
     {
         private readonly IFacultyRepository _facultyRepository;
+        private readonly IMongoCollection<Faculty> _facultyCollection;
 
-        public FacultyController(IFacultyRepository facultyRepository)
+        public FacultyController(IFacultyRepository facultyRepository,DatabaseConfig databaseConfig)
         {
             _facultyRepository = facultyRepository;
+            _facultyCollection = databaseConfig.FacultyCollection;
         }
         [HttpGet("/faculty-get-all")]
         public async Task<IActionResult> GetAll()
@@ -39,6 +43,14 @@ namespace SchoolManagementAPI.Controllers
             await _facultyRepository.Create(faculty);
             return Ok(faculty);
         }
+        [HttpPost("/faculty-auto-generate")]
+        public async Task<IActionResult> AutoGenerate([FromBody] List<Faculty> faculties)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            await _facultyCollection.InsertManyAsync(faculties);
+            return Ok(faculties);
+        }
         [HttpPost("/faculty-update")]
         public async Task<IActionResult> Update([FromBody] Faculty faculty)
         {
@@ -54,13 +66,13 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             try
             {
-                await _facultyRepository.Delete(id);
+                bool isDeleted = await _facultyRepository.Delete(id);
+                return Ok(isDeleted);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return Ok("deleted");
         }
     }
 }

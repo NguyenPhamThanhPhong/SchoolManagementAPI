@@ -15,6 +15,7 @@ namespace SchoolManagementAPI.Repositories.Repo
         private readonly IMongoCollection<Student> _studentCollection;
         private readonly IMongoCollection<Lecturer> _lecturerCollection;
         private readonly IMongoCollection<Semester> _semesterCollection;
+        private readonly SortDefinition<SchoolClass> _sortSchoolClass;
 
         public SchoolClassRepository(DatabaseConfig databaseConfig)
         {
@@ -22,6 +23,7 @@ namespace SchoolManagementAPI.Repositories.Repo
             _studentCollection = databaseConfig.StudentCollection;
             _lecturerCollection = databaseConfig.LecturerCollection;
             _semesterCollection = databaseConfig.SemesterCollection;
+            _sortSchoolClass = Builders<SchoolClass>.Sort.Descending(s => s.ID);
         }
 
         public async Task Create(SchoolClass schoolClass)
@@ -46,32 +48,25 @@ namespace SchoolManagementAPI.Repositories.Repo
         public async Task<bool> Delete(string id)
         {
             var result = await _schoolClassCollection.DeleteOneAsync(s=>s.ID== id);
-            //var filter = Builders<Student>.Filter.In(u => u.ID, schoolClass.StudentLogs.Select(s => s.ID).ToList());
-            //var updateStudent = Builders<Student>.Update.Push(s => s.Classes, schoolClass.ID);
-            //var filterLecturer = Builders<Lecturer>.Filter.Eq(u => u.ID, schoolClass.Lecturer?.ID);
-            //var updateLecturer = Builders<Lecturer>.Update.Push(s => s.Classes, schoolClass.ID);
-            //Task student = _studentCollection.UpdateManyAsync(filter, updateStudent);
-            //Task lecturer = _lecturerCollection.UpdateOneAsync(filterLecturer, updateLecturer);
-            //await Task.WhenAll(student, lecturer);
             return result.DeletedCount > 0;
         }
 
         public async Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter)
         {
             var filter = BsonDocument.Parse(textFilter);
-            return await _schoolClassCollection.Find(filter).ToListAsync();
+            return await _schoolClassCollection.Find(filter).Sort(_sortSchoolClass).ToListAsync();
         }
 
         public async Task<IEnumerable<SchoolClass>> GetfromIds(List<string> ids)
         {
             var filter = Builders<SchoolClass>.Filter.In(s=>s.ID, ids);
-            return await _schoolClassCollection.Find(filter).ToListAsync();
+            return await _schoolClassCollection.Find(filter).Sort(_sortSchoolClass).ToListAsync();
         }
 
         public async Task<IEnumerable<SchoolClass>> GetManyRange(int start, int end)
         {
             var sort = Builders<SchoolClass>.Sort.Descending(s => s.ID);
-            return await _schoolClassCollection.Find(_ => true).Sort(sort).Skip(start).Limit(start - end).ToListAsync();
+            return await _schoolClassCollection.Find(_ => true).Sort(sort).Skip(start).Limit(start - end).Sort(_sortSchoolClass).ToListAsync();
         }
 
         public async Task<SchoolClass?> GetSingle(string id)
