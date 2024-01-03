@@ -87,7 +87,7 @@ namespace SchoolManagementAPI.Configs
                     OnMessageReceived = context =>
                     {
                         context.Token = context.Request.Cookies["access_token"];
-                        Console.WriteLine($"Received token: {context.Token}");
+                        //Console.WriteLine($"Received token: {context.Token}");
                         return Task.CompletedTask;
                     }
                 };
