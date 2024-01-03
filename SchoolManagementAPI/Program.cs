@@ -17,11 +17,13 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors();
 
-app.UseAuthentication();
-
 app.UseHttpsRedirection();
 
+
+app.UseAuthentication();
 app.UseAuthorization();
+
+
 
 app.MapControllers();
 

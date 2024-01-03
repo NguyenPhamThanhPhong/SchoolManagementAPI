@@ -13,7 +13,7 @@ namespace SchoolManagementAPI.RequestResponse.Request
         public string? RoomName { get; set; }
         public string? Program { get; set; }
         public string? ClassType { get; set; }
-        [Required]
+        public DataLink? Lecturer { get; set; }
         public DataLink? Subject { get; set; }
         public string? SemesterId { get; set; }
         public ClassSchedule? Schedule { get; set; }

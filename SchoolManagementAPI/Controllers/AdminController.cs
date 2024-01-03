@@ -1,12 +1,16 @@
 ﻿using Amazon.Runtime.Internal;
 using AutoMapper;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.Authentication;
 using SchoolManagementAPI.Services.SMTP;
+using System.Security.Claims;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -15,14 +19,20 @@ namespace SchoolManagementAPI.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly ILecturerRepository _lecturerRepository;
         private readonly IMapper _mapper;
         private readonly EmailUtil _emailUtil;
+        private readonly TokenGenerator _tokenGenerator;
 
-        public AdminController(IAdminRepository adminRepository, IMapper mapper, EmailUtil emailUtil)
+        public AdminController(IAdminRepository adminRepository, IMapper mapper, EmailUtil emailUtil, TokenGenerator tokenGenerator, IStudentRepository studentRepository, ILecturerRepository lecturerRepository)
         {
             _adminRepository = adminRepository;
             _mapper = mapper;
             this._emailUtil = emailUtil;
+            _tokenGenerator = tokenGenerator;
+            _studentRepository = studentRepository;
+            _lecturerRepository = lecturerRepository;
         }
 
         [HttpPost("/admin-create")]
@@ -42,8 +52,41 @@ namespace SchoolManagementAPI.Controllers
             var admin = await _adminRepository.GetbyUsername(request.Username);
             if (admin == null || admin.Password != request.Password)
                 return BadRequest("not found username");
+            var accessToken = _tokenGenerator.GenerateAccessToken(admin);
+            Response.Cookies.Append("access_token",accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.None
+            });
             return Ok(admin);
         }
+        [Authorize(Roles ="admin")]
+        [HttpGet("/admin-auto-login")]
+        public async Task<IActionResult> GetAuthorizedData()
+        {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine(role);
+            var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (id == null || username == null)
+                return BadRequest("not found user");
+            switch (role)
+            {
+                case "admin":
+                    var admin = await _adminRepository.GetbyID(id);
+                    return Ok(admin);
+                case "lecturer":
+                    var lecturer = await _lecturerRepository.GetbyUsername(username);
+                    return Ok(lecturer);
+                case "student":
+                    var student = await _studentRepository.GetbyId(id);
+                    return Ok(student);
+                default:
+                    return BadRequest("not found user");
+            }
+        }
+
         [HttpGet("/admin-get-password-in-mail/{username}")]
         public async Task<IActionResult> RecoverPassword(string username)
         {

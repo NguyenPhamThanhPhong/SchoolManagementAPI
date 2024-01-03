@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
+using SchoolManagementAPI.Services.Authentication;
 using SchoolManagementAPI.Services.SMTP;
+using System.Security.Claims;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -16,13 +20,14 @@ namespace SchoolManagementAPI.Controllers
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
         private readonly EmailUtil _emailUtil;
+        private readonly TokenGenerator _tokenGenerator;
 
-
-        public StudentController(IStudentRepository studentRepository, IMapper mapper, EmailUtil emailUtil)
+        public StudentController(IStudentRepository studentRepository, IMapper mapper, EmailUtil emailUtil, TokenGenerator tokenGenerator)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
             _emailUtil = emailUtil;
+            _tokenGenerator = tokenGenerator;
         }
 
         [HttpPost("/student-create")]
@@ -50,6 +55,11 @@ namespace SchoolManagementAPI.Controllers
             var student = await _studentRepository.GetbyUsername(request.Username);
             if (student == null || student.Password != request.Password)
                 return BadRequest("not found username");
+            var accessToken = _tokenGenerator.GenerateAccessToken(student);
+            Response.Cookies.Append("access_token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+            });
             return Ok(student);
         }
         [HttpGet("student-get-password-in-mail/{username}")]
