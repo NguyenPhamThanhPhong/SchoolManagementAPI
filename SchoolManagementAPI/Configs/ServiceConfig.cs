@@ -57,39 +57,18 @@ namespace SchoolManagementAPI.Configs
             config.Bind("TokenConfiguration", tokenConfiguration);
             services.AddSingleton(tokenConfiguration);
             services.AddSingleton<TokenGenerator>();
-            services.AddAuthentication(options =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddCookie(options =>
-            {
-                options.Cookie.Name = "access_token";
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(tokenConfiguration.AccessTokenExpirationMinutes); // Adjust based on your requirements
-                options.SlidingExpiration = true;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.AccessTokenSecret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                        tokenConfiguration.AccessTokenSecret)),
                     ValidIssuer = tokenConfiguration.Issuer,
                     ValidAudience = tokenConfiguration.Audience,
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.FromMinutes(6)
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        context.Token = context.Request.Cookies["access_token"];
-                        //Console.WriteLine($"Received token: {context.Token}");
-                        return Task.CompletedTask;
-                    }
+                    ClockSkew = TimeSpan.FromMinutes(20)
                 };
             });
 

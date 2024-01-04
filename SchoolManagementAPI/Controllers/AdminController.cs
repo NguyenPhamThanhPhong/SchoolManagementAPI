@@ -53,17 +53,11 @@ namespace SchoolManagementAPI.Controllers
             if (admin == null || admin.Password != request.Password)
                 return BadRequest("not found username");
             var accessToken = _tokenGenerator.GenerateAccessToken(admin);
-            Response.Cookies.Append("access_token",accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.None
-            });
-            return Ok(admin);
+            return Ok(new {account=admin,accessToken=accessToken});
         }
-        [Authorize(Roles ="admin")]
-        [HttpGet("/admin-auto-login")]
-        public async Task<IActionResult> GetAuthorizedData()
+        //[Authorize(Roles ="admin")]
+        [HttpPost("/admin-auto-login")]
+        public async Task<IActionResult> GetAuthorizedData([FromBody] string token)
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             Console.WriteLine(role);
