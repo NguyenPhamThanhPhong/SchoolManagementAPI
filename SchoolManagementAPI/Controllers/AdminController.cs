@@ -56,8 +56,8 @@ namespace SchoolManagementAPI.Controllers
             return Ok(new {account=admin,accessToken=accessToken});
         }
         //[Authorize(Roles ="admin")]
-        [HttpPost("/admin-auto-login")]
-        public async Task<IActionResult> GetAuthorizedData([FromBody] string token)
+        [HttpGet("/admin-auto-login")]
+        public async Task<IActionResult> GetAuthorizedData()
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             Console.WriteLine(role);
