@@ -21,31 +21,23 @@ namespace SchoolManagementAPI.Services.CloudinaryService
         public async Task<Dictionary<string, string?>?> UploadImages(List<IFormFile>? files, string folderName)
         {
             var result = new Dictionary<string, string?>();
-            if (files == null)
-                return null;
-            try
+
+            foreach (var file in files)
             {
-                foreach (var file in files)
+                if (file.Length > 0)
                 {
-                    if (file.Length > 0)
+                    using (var stream = file.OpenReadStream())
                     {
-                        using (var stream = file.OpenReadStream())
+                        string fileName = Guid.NewGuid().ToString();
+                        var uploadParams = new ImageUploadParams
                         {
-                            string fileName = Guid.NewGuid().ToString();
-                            var uploadParams = new ImageUploadParams
-                            {
-                                File = new FileDescription(fileName, stream),
-                                Folder = folderName
-                            };
-                            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                            result.Add(file.FileName, uploadResult?.SecureUrl.AbsolutePath);
-                        }
+                            File = new FileDescription(fileName, stream),
+                            Folder = folderName
+                        };
+                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                        result.Add(file.FileName, uploadResult.SecureUri.AbsoluteUri);
                     }
                 }
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
             return result;
         }

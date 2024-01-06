@@ -49,6 +49,7 @@ namespace SchoolManagementAPI.Configs
             services.AddTransient<IFacultyRepository, FacultyRepository>();
             services.AddTransient<ISemesterRepository, SemesterRepository>();
             services.AddTransient<ISchoolClassRepository, SchoolClassRepository>();
+            services.AddTransient<IPostRepository, PostRepository>();
             return services;
         }
         public static IServiceCollection ConfigAuthentication(this IServiceCollection services, IConfiguration config)

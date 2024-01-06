@@ -6,6 +6,7 @@ using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.CloudinaryService;
 using SchoolManagementAPI.Services.Configs;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -31,12 +32,18 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpPost("/post-create")]
-        public async Task<IActionResult> Create([FromForm] PostCreateRequest request)
+        public async Task<IActionResult> Create([FromForm] FormDataRequest formDataRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (!TryDeserializeJson(formDataRequest.Requestbody, out PostCreateRequest? request))
+                return BadRequest(request);
+            if (request == null)
+                return BadRequest(ModelState);
+
             var post = _mapper.Map<Post>(request);
-            post.FileUrls = await _cloudinaryHandler.UploadImages(request.Files,_postFolderName);
+            if(formDataRequest.Files!=null && formDataRequest.Files?.Count >0)
+                post.FileUrls = await _cloudinaryHandler.UploadImages(formDataRequest.Files,_postFolderName);
             await _postRepository.Create(post);
             return Ok(post);
         }
@@ -103,5 +110,32 @@ namespace SchoolManagementAPI.Controllers
             await Task.WhenAll(deletePost, Task.WhenAll(taskList));
             return Ok();
         }
+
+        private bool TryDeserializeJson<T>(string? json, out T? result)
+        {
+            if(string.IsNullOrWhiteSpace(json))
+            {
+                result = default(T?);
+                return false;
+            }
+            try
+            {
+                // Use System.Text.Json.JsonSerializer for case-insensitive deserialization
+                result = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    // Ignore case during deserialization
+                    PropertyNameCaseInsensitive = true
+                });
+                return true;
+            }
+            catch (JsonException)
+            {
+                // Handle the exception or log it if necessary
+                result = default;
+                return false;
+            }
+        }
+
+
     }
 }

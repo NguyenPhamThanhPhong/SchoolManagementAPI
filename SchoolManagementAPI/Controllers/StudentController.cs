@@ -13,6 +13,7 @@ using SchoolManagementAPI.Services.CloudinaryService;
 using SchoolManagementAPI.Services.Configs;
 using SchoolManagementAPI.Services.SMTP;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -131,14 +132,20 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpPost("/student-update-instance")]
-        public async Task<IActionResult> UpdateInstance([FromForm] SchoolMemberUpdateRequest request)
+        public async Task<IActionResult> UpdateInstance([FromForm] FormDataRequest formDataRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (!TryDeserializeJson(formDataRequest.Requestbody, out SchoolMemberUpdateRequest? request))
+                return BadRequest(request);
+            if (request == null)
+                return BadRequest(ModelState);
+
+
             Student student = _mapper.Map<Student>(request);    
-            if(request.File!=null && request.File.Length > 0)
+            if(formDataRequest.File!=null && formDataRequest.File.Length > 0)
             {
-                var fileUrl = await _cloudinaryHandler.UploadSingleImage(request.File, _studentFolderName);
+                var fileUrl = await _cloudinaryHandler.UploadSingleImage(formDataRequest.File, _studentFolderName);
                 if (fileUrl != null)
                     student.PersonalInfo.AvatarUrl = fileUrl;
             }
@@ -151,5 +158,31 @@ namespace SchoolManagementAPI.Controllers
 
             return Ok(student);
         }
+
+        private bool TryDeserializeJson<T>(string? json, out T? result)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                result = default(T?);
+                return false;
+            }
+            try
+            {
+                // Use System.Text.Json.JsonSerializer for case-insensitive deserialization
+                result = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    // Ignore case during deserialization
+                    PropertyNameCaseInsensitive = true
+                });
+                return true;
+            }
+            catch (JsonException)
+            {
+                // Handle the exception or log it if necessary
+                result = default;
+                return false;
+            }
+        }
+
     }
 }

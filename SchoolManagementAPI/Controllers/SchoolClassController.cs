@@ -21,14 +21,16 @@ namespace SchoolManagementAPI.Controllers
         private readonly IMapper _mapper;
         private readonly CloudinaryHandler _cloudinaryHandler;
         private readonly string _schoolClassFolderName;
+        private readonly IMongoCollection<SchoolClass> _schoolClassCollection;
 
-        public SchoolClassController(ISchoolClassRepository schoolClassRepository, IMapper mapper,
+        public SchoolClassController(ISchoolClassRepository schoolClassRepository, IMapper mapper, DatabaseConfig databaseConfig,
             CloudinaryHandler cloudinaryHandler, CloudinaryConfig cloudinaryConfig)
         {
             _schoolClassRepository = schoolClassRepository;
             _mapper = mapper;
             _cloudinaryHandler = cloudinaryHandler;
             _schoolClassFolderName = cloudinaryConfig.ClassSectionFolderName;
+            _schoolClassCollection = databaseConfig.SchoolClassCollection;
         }
 
         [HttpPost("/class-create")]
@@ -42,19 +44,25 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpDelete("/class-delete/{id}")]
-        public async Task<IActionResult> Delete(string id, [FromBody] List<string> prevUrls)
+        public async Task<IActionResult> Delete(string id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var deleteResult = await _schoolClassRepository.Delete(id);
 
-            if (prevUrls != null)
-                foreach (var url in prevUrls)
-                    await _cloudinaryHandler.Delete(url);
-
             if (deleteResult)
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
+        }
+        [HttpDelete("/class-delete/{id}")]
+        public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var filter = Builders<SchoolClass>.Filter.In(s => s.ID, ids);
+            var deleteResult = await _schoolClassCollection.DeleteManyAsync(filter);
+            return Ok(deleteResult.DeletedCount>0);
         }
 
         [HttpGet("/class-get-by-id/{id}")]
@@ -102,7 +110,7 @@ namespace SchoolManagementAPI.Controllers
             var isUpdated = await _schoolClassRepository.UpdateByParameters(id, new List<UpdateParameter> { parameter });
             return Ok("updated");
         }
-
+ 
         [HttpPost("/class-update-schedule/{id}")]
         public async Task<IActionResult> UpdateSchedule(string id, [FromForm] ClassSchedule schedulePiece)
         {

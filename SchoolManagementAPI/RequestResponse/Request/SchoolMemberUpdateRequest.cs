@@ -18,7 +18,6 @@ namespace SchoolManagementAPI.RequestResponse.Request
         public Dictionary<string, List<ClassSchedule>> ScheduleAggregations { get; set; }
         public Dictionary<string, List<CreditLog>> creditLogs { get; set; }
         public string? PrevUrl { get; set; }
-        public IFormFile? File { get; set; }
 
         public SchoolMemberUpdateRequest()
         {
