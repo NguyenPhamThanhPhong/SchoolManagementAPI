@@ -9,7 +9,7 @@ namespace SchoolManagementAPI.Models.Embeded.Account
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public List<int> Scores { get; set; }
+        public List<int> Scores { get; set; } //int
         public StudyStatus Status { get; set; }
         public CreditLog() 
         { 

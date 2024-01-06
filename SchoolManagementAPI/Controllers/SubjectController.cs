@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using SchoolManagementAPI.Models.Embeded.ReuseTypes;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
+using SchoolManagementAPI.Services.Configs;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -15,12 +16,15 @@ namespace SchoolManagementAPI.Controllers
         private readonly ISubjectRepository _subjectRepository;
         private readonly IMapper _mapper;
         private readonly ISchoolClassRepository _schoolClassRepository;
+        private readonly IMongoCollection<Subject> _subjectCollection;
 
-        public SubjectController(ISubjectRepository subjectRepository, IMapper mapper, ISchoolClassRepository schoolClassRepository)
+        public SubjectController(ISubjectRepository subjectRepository, IMapper mapper,
+            ISchoolClassRepository schoolClassRepository, DatabaseConfig databaseconfig)
         {
             _subjectRepository = subjectRepository;
             _mapper = mapper;
             _schoolClassRepository = schoolClassRepository;
+            _subjectCollection = databaseconfig.SubjectCollection;
         }
 
         [HttpPost("/subject-create")]
@@ -47,6 +51,7 @@ namespace SchoolManagementAPI.Controllers
             var subject = await _subjectRepository.GetOne(id);
             return Ok(subject);
         }
+
         [HttpPost("/subject-update-instance/{prevName}")]
         public async Task<IActionResult> UpdateInstance(string prevName, [FromBody] Subject subject)
         {
@@ -64,6 +69,17 @@ namespace SchoolManagementAPI.Controllers
             });
             await Task.WhenAll(updateSubject,myTask);
             return Ok(subject);
+        }
+
+
+        [HttpDelete("/subject-update-many")]
+        public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var filter = Builders<Subject>.Filter.In(s => s.ID, ids);
+            var result = await _subjectCollection.DeleteManyAsync(filter);
+            return Ok(result.DeletedCount);
         }
         [HttpDelete("/subject-delete/{id}")]
         public async Task<IActionResult> Delete( string id)

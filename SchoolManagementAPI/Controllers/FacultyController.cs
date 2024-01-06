@@ -19,22 +19,6 @@ namespace SchoolManagementAPI.Controllers
             _facultyRepository = facultyRepository;
             _facultyCollection = databaseConfig.FacultyCollection;
         }
-        [HttpGet("/faculty-get-all")]
-        public async Task<IActionResult> GetAll()
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var facultys = await _facultyRepository.GetAll();
-            return Ok(facultys);
-        }
-        [HttpGet("/faculty/{id}")]
-        public async Task<IActionResult> GetOne(string id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var faculty = await _facultyRepository.GetOne(id);
-            return Ok(faculty);
-        }
         [HttpPost("/faculty-create")]
         public async Task<IActionResult> Create([FromBody] Faculty faculty)
         {
@@ -51,6 +35,27 @@ namespace SchoolManagementAPI.Controllers
             await _facultyCollection.InsertManyAsync(faculties);
             return Ok(faculties);
         }
+
+
+        [HttpGet("/faculty-get-all")]
+        public async Task<IActionResult> GetAll()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var facultys = await _facultyRepository.GetAll();
+            return Ok(facultys);
+        }
+        [HttpGet("/faculty-get-by-id/{id}")]
+        public async Task<IActionResult> GetOne(string id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var faculty = await _facultyRepository.GetOne(id);
+            return Ok(faculty);
+        }
+
+
+
         [HttpPost("/faculty-update")]
         public async Task<IActionResult> Update([FromBody] Faculty faculty)
         {
@@ -59,6 +64,7 @@ namespace SchoolManagementAPI.Controllers
             await _facultyRepository.UpdatebyInstance(faculty);
             return Ok(faculty);
         }
+
         [HttpDelete("/faculty-delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -73,6 +79,15 @@ namespace SchoolManagementAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        [HttpDelete("/faculty-delete-many")]
+        public async Task<IActionResult> DeleteMany([FromBody]List<string> ids)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var filter = Builders<Faculty>.Filter.In(f => f.ID, ids);
+            var result = await _facultyCollection.DeleteManyAsync(filter);
+            return Ok(result.DeletedCount);
         }
     }
 }

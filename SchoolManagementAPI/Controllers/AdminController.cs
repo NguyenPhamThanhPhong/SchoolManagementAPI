@@ -56,6 +56,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(new {account=admin,accessToken=accessToken});
         }
         //[Authorize(Roles ="admin")]
+        [Authorize]
         [HttpGet("/admin-auto-login")]
         public async Task<IActionResult> GetAuthorizedData()
         {

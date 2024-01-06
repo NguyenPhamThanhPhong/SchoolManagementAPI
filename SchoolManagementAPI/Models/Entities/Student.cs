@@ -8,7 +8,7 @@ namespace SchoolManagementAPI.Models.Entities
     [BsonIgnoreExtraElements]
     public class Student : SchoolMember
     {
-        Dictionary<string,List<CreditLog>> creditLogs;
+        public Dictionary<string,List<CreditLog>> creditLogs { get; set; }
 
         public Student(): base()
         {

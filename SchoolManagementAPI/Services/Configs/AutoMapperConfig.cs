@@ -11,6 +11,9 @@ namespace SchoolManagementAPI.Services.Configs
         {
             CreateMap<SchoolMemberCreateRequest, Student>();
             CreateMap<SchoolMemberCreateRequest, Lecturer>();
+            CreateMap<SchoolMemberUpdateRequest, Student>();
+            CreateMap<SchoolMemberUpdateRequest,Lecturer>();
+
             CreateMap<AccountCreateRequest, Admin>();
             CreateMap<PostCreateRequest, Post>();
             CreateMap<PostUpdateRequest, Post>();

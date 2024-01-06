@@ -12,7 +12,7 @@ namespace SchoolManagementAPI.Controllers
     public class SemesterController : ControllerBase
     {
         private readonly ISemesterRepository _semesterRepository;
-        private readonly IMongoCollection<Semester> _semesterCollection;    
+        private readonly IMongoCollection<Semester> _semesterCollection;   
 
         public SemesterController(ISemesterRepository semesterRepository,DatabaseConfig databaseConfig)
         {
@@ -35,6 +35,8 @@ namespace SchoolManagementAPI.Controllers
             var semester = await _semesterRepository.GetOne(id);
             return Ok(semester);
         }
+
+
         [HttpPost("/semester-create")]
         public async Task<IActionResult> Create([FromBody] Semester semester)
         {
@@ -52,6 +54,8 @@ namespace SchoolManagementAPI.Controllers
             await _semesterCollection.InsertManyAsync(semesters);
             return Ok(semesters);
         }
+
+
 
         [HttpPost("/semester-update")]
         public async Task<IActionResult> Update([FromBody] Semester semester)
@@ -75,6 +79,22 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ex.Message);
             }
             return Ok("deleted");
+        }
+        [HttpDelete("/semester-delete-many")]
+        public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var filter = Builders<Semester>.Filter.In(s => s.ID, ids);
+                var result = await _semesterCollection.DeleteManyAsync(filter);
+                return Ok(result.DeletedCount);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -3,11 +3,14 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Repositories.Repo;
 using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.Authentication;
+using SchoolManagementAPI.Services.CloudinaryService;
+using SchoolManagementAPI.Services.Configs;
 using SchoolManagementAPI.Services.SMTP;
 using System.Security.Claims;
 
@@ -21,13 +24,21 @@ namespace SchoolManagementAPI.Controllers
         private readonly IMapper _mapper;
         private readonly EmailUtil _emailUtil;
         private readonly TokenGenerator _tokenGenerator;
+        private readonly IMongoCollection<Student> _studentCollection;
+        private readonly CloudinaryHandler _cloudinaryHandler;
+        private readonly string _studentFolderName;
 
-        public StudentController(IStudentRepository studentRepository, IMapper mapper, EmailUtil emailUtil, TokenGenerator tokenGenerator)
+        public StudentController(IStudentRepository studentRepository, IMapper mapper,
+            EmailUtil emailUtil, TokenGenerator tokenGenerator, DatabaseConfig databaseConfig, 
+            CloudinaryHandler cloudinaryHandler,CloudinaryConfig cloudinaryConfig)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
             _emailUtil = emailUtil;
             _tokenGenerator = tokenGenerator;
+            _studentCollection = databaseConfig.StudentCollection;
+            _cloudinaryHandler = cloudinaryHandler;
+            _studentFolderName = cloudinaryConfig.StudentFolderName;
         }
 
         [HttpPost("/student-create")]
@@ -39,15 +50,9 @@ namespace SchoolManagementAPI.Controllers
             await _studentRepository.Create(student);
             return Ok(student);
         }
-        [HttpGet("/student-get-by-id/{id}")]
-        public async Task<IActionResult> GetById(string id)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var student = await _studentRepository.GetbyId(id);
-            return Ok(student);
-        }
-        [HttpPost("/student-login/")]
+
+
+        [HttpPost("/student-login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
@@ -62,6 +67,7 @@ namespace SchoolManagementAPI.Controllers
             });
             return Ok(student);
         }
+
         [HttpGet("student-get-password-in-mail/{username}")]
         public async Task<IActionResult> RecoverPassword(string username)
         {
@@ -77,6 +83,17 @@ namespace SchoolManagementAPI.Controllers
 
             return Ok(isSent);
         }
+
+
+        [HttpGet("/student-get-by-id/{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var student = await _studentRepository.GetbyId(id);
+            return Ok(student);
+        }
+
         [HttpGet("/student-get-many-range/{start}/{end}")]
         public async Task<IActionResult> ManyRange(int start, int end)
         {
@@ -93,15 +110,8 @@ namespace SchoolManagementAPI.Controllers
             var students = await _studentRepository.GetManyfromIds(ids);
             return Ok(students);
         }
-        [HttpPost("/student-get-by-text-filter")]
-        public async Task<IActionResult> GetbyTextFilter([FromForm] string filter)
-        {
-            Console.WriteLine("in controller: \n"+ filter+"\n");
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var students = await _studentRepository.GetbyTextFilter(filter);
-            return Ok(students);
-        }
+
+
         [HttpDelete("/student-delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -110,22 +120,35 @@ namespace SchoolManagementAPI.Controllers
             var isDeleted = await _studentRepository.Delete(id);
             return Ok(isDeleted);
         }
-        [HttpPost("/student-update-string-fields/{id}")]
-        public async Task<IActionResult> UpdateStringFields(string id, [FromBody] List<UpdateParameter> paramters)
+        [HttpDelete("/student-delete-many")]
+        public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var isUpdated = await _studentRepository.UpdateStringFields(id, paramters);
-            return Ok(isUpdated);
+            var filter = Builders<Student>.Filter.In(l => l.ID, ids);
+            var result = await _studentCollection.DeleteManyAsync(filter);
+            return Ok(result.DeletedCount);
         }
+
         [HttpPost("/student-update-instance")]
-        public async Task<IActionResult> UpdateStringFields([FromBody] Student student)
+        public async Task<IActionResult> UpdateInstance([FromForm] SchoolMemberUpdateRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var isUpdated = await _studentRepository.UpdatebyInstance(student.ID,student);
-            if (!isUpdated)
-                return BadRequest(isUpdated);
+            Student student = _mapper.Map<Student>(request);    
+            if(request.File!=null && request.File.Length > 0)
+            {
+                var fileUrl = await _cloudinaryHandler.UploadSingleImage(request.File, _studentFolderName);
+                if (fileUrl != null)
+                    student.PersonalInfo.AvatarUrl = fileUrl;
+            }
+
+            var updateTask = _studentRepository.UpdatebyInstance(student.ID, student);
+            if(request.PrevUrl!=null)
+                await Task.WhenAll(_cloudinaryHandler.Delete(request.PrevUrl), updateTask);
+            else
+            await updateTask;
+
             return Ok(student);
         }
     }

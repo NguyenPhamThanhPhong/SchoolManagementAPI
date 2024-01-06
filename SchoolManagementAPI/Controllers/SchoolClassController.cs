@@ -40,6 +40,46 @@ namespace SchoolManagementAPI.Controllers
             await _schoolClassRepository.Create(schoolClass);
             return Ok(schoolClass);
         }
+
+        [HttpDelete("/class-delete/{id}")]
+        public async Task<IActionResult> Delete(string id, [FromBody] List<string> prevUrls)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var deleteResult = await _schoolClassRepository.Delete(id);
+
+            if (prevUrls != null)
+                foreach (var url in prevUrls)
+                    await _cloudinaryHandler.Delete(url);
+
+            if (deleteResult)
+                return Ok($"deleted {deleteResult}");
+            return BadRequest(deleteResult);
+        }
+
+        [HttpGet("/class-get-by-id/{id}")]
+        public async Task<IActionResult> GetOne(string id)
+        {
+            var schoolclass = await _schoolClassRepository.GetSingle(id);
+            if (schoolclass != null)
+                return Ok(schoolclass);
+            return Ok(schoolclass);
+        }
+        [HttpPost("/class-get-many-from-ids/")]
+        public async Task<IActionResult> GetfromIds(List<string> ids)
+        {
+            var classes = await _schoolClassRepository.GetfromIds(ids);
+            return Ok(classes);
+        }
+
+        [HttpGet("/class-get-many-range/{start}/{end}")]
+        public async Task<IActionResult> GetManyRange(int start, int end)
+        {
+            var classes = await _schoolClassRepository.GetManyRange(start, end);
+            return Ok(classes);
+        }
+
+
         [HttpPost("/class-update-instance")]
         public async Task<IActionResult> UpdateInstance([FromBody] SchoolClass schoolClass)
         {
@@ -63,47 +103,6 @@ namespace SchoolManagementAPI.Controllers
             return Ok("updated");
         }
 
-        [HttpDelete("/class-delete/{id}")]
-        public async Task<IActionResult> Delete(string id, [FromBody] List<string> prevUrls)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var deleteResult = await _schoolClassRepository.Delete(id);
-
-            if (prevUrls != null)
-                foreach (var url in prevUrls)
-                    await _cloudinaryHandler.Delete(url);
-
-            if (deleteResult)
-                return Ok($"deleted {deleteResult}");
-            return BadRequest(deleteResult);
-        }
-        [HttpGet("/class-get-by-id/{id}")]
-        public async Task<IActionResult> GetOne(string id)
-        {
-            var schoolclass = await _schoolClassRepository.GetSingle(id);
-            if (schoolclass != null)
-                return Ok(schoolclass);
-            return Ok(schoolclass);
-        }
-        [HttpPost("/class-get-by-filter")]
-        public async Task<IActionResult> GetFilter([FromForm] string textFilter)
-        {
-            var schoolClasses = await _schoolClassRepository.GetbyTextFilter(textFilter);
-            return Ok(schoolClasses);
-        }
-        [HttpGet("/class-get-many-range/{start}/{end}")]
-        public async Task<IActionResult> GetManyRange(int start, int end)
-        {
-            var classes = await _schoolClassRepository.GetManyRange(start, end);
-            return Ok(classes);
-        }
-        [HttpPost("/class-get-many-from-ids/")]
-        public async Task<IActionResult> GetfromIds(List<string> ids)
-        {
-            var classes = await _schoolClassRepository.GetfromIds(ids);
-            return Ok(classes);
-        }
         [HttpPost("/class-update-schedule/{id}")]
         public async Task<IActionResult> UpdateSchedule(string id, [FromForm] ClassSchedule schedulePiece)
         {
