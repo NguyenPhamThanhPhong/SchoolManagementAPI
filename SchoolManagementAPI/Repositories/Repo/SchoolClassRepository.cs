@@ -45,10 +45,10 @@ namespace SchoolManagementAPI.Repositories.Repo
             await Task.WhenAll(student, lecturer,semester);
         }
 
-        public async Task<bool> Delete(string id)
+        public async Task<SchoolClass?> Delete(string id)
         {
-            var result = await _schoolClassCollection.DeleteOneAsync(s=>s.ID== id);
-            return result.DeletedCount > 0;
+            var result = await _schoolClassCollection.FindOneAndDeleteAsync(s=>s.ID== id);
+            return result;
         }
 
         public async Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter)

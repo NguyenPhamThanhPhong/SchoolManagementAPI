@@ -65,11 +65,8 @@ namespace SchoolManagementAPI.Controllers
             if (lecturer == null || lecturer.Password != request.Password)
                 return BadRequest("not found username");
             var accessToken = _tokenGenerator.GenerateAccessToken(lecturer);
-            Response.Cookies.Append("access_token", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-            });
-            return Ok(lecturer);
+
+            return Ok(new { account = lecturer, accessToken = accessToken });
         }
 
         [HttpGet("/lecturer-get-many-range/{start}/{end}")]

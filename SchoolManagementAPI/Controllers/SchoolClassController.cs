@@ -50,11 +50,11 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             var deleteResult = await _schoolClassRepository.Delete(id);
 
-            if (deleteResult)
+            if (deleteResult!=null)
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
         }
-        [HttpDelete("/class-delete")]
+        [HttpDelete("/class-delete-many")]
         public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
         {
             if (!ModelState.IsValid)

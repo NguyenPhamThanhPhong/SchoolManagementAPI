@@ -7,7 +7,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
     public interface ISchoolClassRepository
     {
         public Task Create(SchoolClass schoolClass);
-        public Task<bool> Delete(string id);
+        public Task<SchoolClass?> Delete(string id);
 
         public Task<SchoolClass?> GetSingle(string id);
         public Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter);

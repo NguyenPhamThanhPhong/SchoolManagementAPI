@@ -62,11 +62,8 @@ namespace SchoolManagementAPI.Controllers
             if (student == null || student.Password != request.Password)
                 return BadRequest("not found username");
             var accessToken = _tokenGenerator.GenerateAccessToken(student);
-            Response.Cookies.Append("access_token", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-            });
-            return Ok(student);
+
+            return Ok(new { account = student, accessToken = accessToken });
         }
 
         [HttpGet("student-get-password-in-mail/{username}")]
