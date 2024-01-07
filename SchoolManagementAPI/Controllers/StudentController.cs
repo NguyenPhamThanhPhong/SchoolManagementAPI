@@ -114,21 +114,35 @@ namespace SchoolManagementAPI.Controllers
 
 
         [HttpDelete("/student-delete/{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, [FromBody] string? prevUrl)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var isDeleted = await _studentRepository.Delete(id);
-            return Ok(isDeleted);
+            var deleteTask = _studentRepository.Delete(id);
+            if (!string.IsNullOrWhiteSpace(prevUrl))
+                await Task.WhenAll(deleteTask, _cloudinaryHandler.Delete(prevUrl));
+            else
+                await deleteTask;
+            return Ok(true);
         }
         [HttpDelete("/student-delete-many")]
-        public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
+        public async Task<IActionResult> DeleteMany([FromBody] DeleteManyRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var ids = request.Ids;
+            var prevUrls = request.PrevUrls;
+
             var filter = Builders<Student>.Filter.In(l => l.ID, ids);
-            var result = await _studentCollection.DeleteManyAsync(filter);
-            return Ok(result.DeletedCount);
+            var deleteTask = _studentCollection.DeleteManyAsync(filter);
+            List<Task> deleteImgTasks = new List<Task>();
+            if (prevUrls != null && prevUrls.Count > 0)
+                foreach (var url in prevUrls)
+                    deleteImgTasks.Add(_cloudinaryHandler.Delete(url));
+
+            await Task.WhenAll(deleteTask, Task.WhenAll(deleteImgTasks));
+            return Ok(true);
         }
 
         [HttpPost("/student-update-instance")]

@@ -65,6 +65,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(faculty);
         }
 
+
         [HttpDelete("/faculty-delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {

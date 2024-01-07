@@ -54,7 +54,7 @@ namespace SchoolManagementAPI.Controllers
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
         }
-        [HttpDelete("/class-delete/{id}")]
+        [HttpDelete("/class-delete")]
         public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
         {
             if (!ModelState.IsValid)

@@ -72,7 +72,7 @@ namespace SchoolManagementAPI.Controllers
         }
 
 
-        [HttpDelete("/subject-update-many")]
+        [HttpDelete("/subject-delete-many")]
         public async Task<IActionResult> DeleteMany([FromBody] List<string> ids)
         {
             if (!ModelState.IsValid)
