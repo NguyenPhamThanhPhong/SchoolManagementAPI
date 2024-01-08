@@ -104,10 +104,9 @@ namespace SchoolManagementAPI.Controllers
             List<Task> taskList = new List<Task>();
 
             if (request.PrevUrls != null && request.PrevUrls.Count > 0)
-                foreach (var url in request.PrevUrls)
-                    taskList.Add(_cloudinaryHandler.Delete(url));
-
-            await Task.WhenAll(deletePost, Task.WhenAll(taskList));
+                await Task.WhenAll(deletePost, _cloudinaryHandler.DeleteMany(request.PrevUrls));
+            else
+                await deletePost;
             return Ok();
         }
 

@@ -16,6 +16,7 @@ namespace SchoolManagementAPI.Services.Configs
         public string SemesterCollectionName { get; set; }
         public string FacultyCollectionName { get; set; }
         public string PostCollectionName { get; set; }
+        public string StudentRegistrationCollectionName { get; set; }
 
 
         public IMongoClient MongoClient { get; set; }
@@ -30,6 +31,7 @@ namespace SchoolManagementAPI.Services.Configs
         public IMongoCollection<Semester> SemesterCollection { get; set; }
         public IMongoCollection<Faculty> FacultyCollection { get; set; }
         public IMongoCollection<Post> PostCollection { get; set; }
+        public IMongoCollection<StudentRegistration> StudentRegistrationCollection { get; set; }
 
         public void SetUpDatabase()
         {
@@ -56,6 +58,7 @@ namespace SchoolManagementAPI.Services.Configs
             FacultyCollection = MongoDatabase.GetCollection<Faculty>(FacultyCollectionName);
 
             PostCollection = MongoDatabase.GetCollection<Post>(PostCollectionName);
+            StudentRegistrationCollection = MongoDatabase.GetCollection<StudentRegistration>(StudentRegistrationCollectionName);
         }
 
         private void CreateUniqueIndex()
@@ -71,7 +74,6 @@ namespace SchoolManagementAPI.Services.Configs
             StudentCollection.Indexes.CreateOne(new CreateIndexModel<Student>(studentIndexKeysDefinition, indexOptions));
             LecturerCollection.Indexes.CreateOne(new CreateIndexModel<Lecturer>(lecturerIndexKeysDefinition, indexOptions));
             AdminCollection.Indexes.CreateOne(new CreateIndexModel<Admin>(adminIndexKeysDefinition, indexOptions));
-
         }
     }
 }

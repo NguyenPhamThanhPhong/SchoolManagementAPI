@@ -104,6 +104,8 @@ namespace SchoolManagementAPI.Configs
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.Converters.Add(new DateTimeConverter("dd/MM/yyyy"));
+                options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
+
             });
             //Allow all hosts
             services.AddCors(options =>
