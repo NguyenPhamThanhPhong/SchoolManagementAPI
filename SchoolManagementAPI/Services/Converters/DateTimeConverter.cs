@@ -24,6 +24,8 @@ namespace SchoolManagementAPI.Services.Converters
             if (DateTime.TryParseExact(reader.GetString(), _dateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
                 return result;
 
+            Console.WriteLine(reader.GetString());
+
             // Handle parsing errors
             throw new JsonException($"Failed to parse date. Expected format: {_dateFormat}");
         }

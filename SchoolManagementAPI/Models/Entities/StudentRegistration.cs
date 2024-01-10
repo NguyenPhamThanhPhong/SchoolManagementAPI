@@ -16,8 +16,6 @@ namespace SchoolManagementAPI.Models.Entities
         {
             ID = string.Empty;
             Name = string.Empty;
-            StartTime = DateTime.MinValue;
-            EndTime = DateTime.MaxValue;
             semesterId= string.Empty;
             classIds = new List<string>();
         }

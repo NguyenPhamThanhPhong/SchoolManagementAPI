@@ -11,6 +11,7 @@ using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.Authentication;
 using SchoolManagementAPI.Services.CloudinaryService;
 using SchoolManagementAPI.Services.Configs;
+using SchoolManagementAPI.Services.Converters;
 using SchoolManagementAPI.Services.SMTP;
 using System.Security.Claims;
 using System.Text.Json;
@@ -45,13 +46,23 @@ namespace SchoolManagementAPI.Controllers
             _lecturerFolderName = cloudinaryConfig.LecturerFolderName;
         }
         [HttpPost("/lecturer-create")]
-        public async Task<IActionResult> Create([FromBody] SchoolMemberCreateRequest request)
+        public async Task<IActionResult> Create([FromForm] FormDataRequest formDataRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var lecturer = _mapper.Map<Lecturer>(request);
-            await _lecturerRepository.Create(lecturer);
 
+            if (!TryDeserializeJson(formDataRequest.Requestbody, out SchoolMemberCreateRequest? request))
+                return BadRequest(request);
+            if (request == null)
+                return BadRequest(ModelState);
+
+            var lecturer = _mapper.Map<Lecturer>(request);
+            if(formDataRequest?.File!=null)
+            {
+                string? url = await _cloudinaryHandler.UploadSingleImage(formDataRequest.File, _lecturerFolderName);
+                lecturer.PersonalInfo.AvatarUrl = url;
+            }
+            await _lecturerRepository.Create(lecturer);
             return Ok(lecturer);
         }
 
@@ -175,17 +186,20 @@ namespace SchoolManagementAPI.Controllers
                 result = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
                 {
                     // Ignore case during deserialization
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new DateTimeConverter("dd/MM/yyyy") }
                 });
                 return true;
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
+                Console.WriteLine(ex.Message);
                 // Handle the exception or log it if necessary
                 result = default;
                 return false;
             }
         }
+
 
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Services.Configs;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -29,8 +30,10 @@ namespace SchoolManagementAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            Console.WriteLine(JsonSerializer.Serialize(ModelState));
+            Console.WriteLine(JsonSerializer.Serialize(registration));
             await _studentRegistrationCollection.ReplaceOneAsync(s=>s.ID==registration.ID,registration);
-            return Ok(registration);
+            return Ok(ModelState);
         }
         [HttpDelete("/registration-delete/{id}")]
         public async Task<IActionResult> Delete(string id)

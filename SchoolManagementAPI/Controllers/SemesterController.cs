@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using SchoolManagementAPI.Models.Entities;
 using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.Services.Configs;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -62,6 +63,7 @@ namespace SchoolManagementAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            Console.WriteLine(JsonSerializer.Serialize(semester));
             await _semesterRepository.UpdatebyInstance(semester);
             return Ok(semester);
         }

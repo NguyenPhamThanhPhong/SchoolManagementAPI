@@ -10,6 +10,7 @@ using SchoolManagementAPI.Repositories.Interfaces;
 using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.CloudinaryService;
 using SchoolManagementAPI.Services.Configs;
+using System.Reflection.Metadata;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -22,6 +23,7 @@ namespace SchoolManagementAPI.Controllers
         private readonly CloudinaryHandler _cloudinaryHandler;
         private readonly string _schoolClassFolderName;
         private readonly IMongoCollection<SchoolClass> _schoolClassCollection;
+        private readonly IMongoCollection<Student> _studentCollection;
 
         public SchoolClassController(ISchoolClassRepository schoolClassRepository, IMapper mapper, DatabaseConfig databaseConfig,
             CloudinaryHandler cloudinaryHandler, CloudinaryConfig cloudinaryConfig)
@@ -31,6 +33,7 @@ namespace SchoolManagementAPI.Controllers
             _cloudinaryHandler = cloudinaryHandler;
             _schoolClassFolderName = cloudinaryConfig.ClassSectionFolderName;
             _schoolClassCollection = databaseConfig.SchoolClassCollection;
+            _studentCollection = databaseConfig.StudentCollection;
         }
 
         [HttpPost("/class-create")]
@@ -96,37 +99,63 @@ namespace SchoolManagementAPI.Controllers
             await _schoolClassRepository.UpdatebyInstance(schoolClass);
             return Ok(schoolClass);
         }
-        [HttpPost("/class-student-registration/{id}/{action}")]
-        public async Task<IActionResult> UpdateStudentRegistration(string id, UpdateOption option, [FromBody] StudentLog studentLog)
+        [HttpPost("/class-student-registration")]
+        public async Task<IActionResult> UpdateStudentRegistration([FromBody] SchoolClassRegistrationRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var parameter = new UpdateParameter
+            var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID , request.ID);
+            if (request.option == UpdateOption.push)
             {
-                fieldName = SchoolClass.GetFieldName(s => s.StudentLogs),
-                value = studentLog,
-                option = option
-            };
-            var isUpdated = await _schoolClassRepository.UpdateByParameters(id, new List<UpdateParameter> { parameter });
+                var studentlog = new StudentLog { ID = request.StudentId };
+                var update = Builders<SchoolClass>.Update.Push(s => s.StudentLogs, studentlog);
+                var isupdated = await _schoolClassCollection.UpdateOneAsync(filter, update);
+                var updateStudent = Builders<Student>.Update.Push(s => s.Classes, request.ID);
+                var isupdate2 = await _studentCollection.UpdateOneAsync(s => s.ID == request.StudentId, updateStudent);
+                Console.WriteLine("run here" + isupdated.ModifiedCount);
+                Console.WriteLine("rrun 333" + isupdate2.ModifiedCount);
+            }
+            else
+            {
+
+                var update = Builders<SchoolClass>.Update.PullFilter(s => s.StudentLogs, Builders<StudentLog>.Filter.Eq(stu => stu.ID, request.StudentId));
+                await _schoolClassCollection.UpdateOneAsync(filter, update);
+                var updateStudent = Builders<Student>.Update.Pull(s => s.Classes, request.ID);
+                await _studentCollection.UpdateOneAsync(s => s.ID == request.StudentId, updateStudent);
+            }
+
+
             return Ok("updated");
         }
- 
-        [HttpPost("/class-update-schedule/{id}")]
-        public async Task<IActionResult> UpdateSchedule(string id, [FromForm] ClassSchedule schedulePiece)
+        [HttpPost("/class-update-create-fields/{id}")]
+        public async Task<IActionResult> UpdateCreatFields([FromBody] SchoolClassCreateRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var paramter = new UpdateParameter
-            {
-                fieldName = SchoolClass.GetFieldName(s => s.Schedule),
-                value = schedulePiece,
-                option = UpdateOption.set
-            };
-            var isUpdated = await _schoolClassRepository.UpdateByParameters(id, new List<UpdateParameter> { paramter });
-
-
-            return Ok(isUpdated);
+            var schoolClass = await _schoolClassCollection.Find(s => s.ID == request.ID).FirstOrDefaultAsync();
+            schoolClass.Name = request.Name;
+            schoolClass.RoomName = request.RoomName;
+            schoolClass.Program = request.Program;
+            schoolClass.ClassType = request.ClassType;
+            schoolClass.Subject = request.Subject;
+            schoolClass.SemesterId = request.SemesterId;
+            schoolClass.Lecturer = request.Lecturer;
+            schoolClass.Schedule = request.Schedule;
+            await _schoolClassCollection.ReplaceOneAsync(s => s.ID == request.ID, schoolClass);
+            return Ok("updated");
         }
+        [HttpPost("/class-update-exam/{id}")]
+        public async Task<IActionResult> UpdateExams([FromQuery]string id,[FromBody] List<ExamMileStone> exams)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, id);
+            var update = Builders<SchoolClass>.Update.Set(s => s.Exams, exams);
+            await _schoolClassCollection.UpdateOneAsync(filter, update);
+            return Ok("updated");
+        }
+        [HttpPost("/class-update-")]
+
         [HttpPost("/class-append-sections/{id}/{position}/{updateOption}")]
         public async Task<IActionResult> AppendSection(string id, int position, UpdateOption option, [FromForm] SchoolClassUpdateSectionsRequest request)
         {

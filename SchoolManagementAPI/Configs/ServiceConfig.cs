@@ -100,6 +100,7 @@ namespace SchoolManagementAPI.Configs
             services.AddControllers(options =>
             {
                 options.ModelBinderProviders.Insert(0, new TimeSpanModelBinderProvider());
+                options.AllowEmptyInputInBodyModelBinding = true;
             }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
