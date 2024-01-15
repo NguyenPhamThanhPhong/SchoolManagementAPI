@@ -9,7 +9,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task Create(Lecturer lecturer);
         public Task<Lecturer?> Delete(string id);
 
-
+        Task<IEnumerable<Lecturer>> GetAll();
         public Task<Lecturer?> GetbyUsername(string username);
         public Task<IEnumerable<Lecturer>> GetbyTextFilter(string textFilter);
         public Task<IEnumerable<Lecturer>> GetManyfromIds(List<string> ids);

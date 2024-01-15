@@ -26,6 +26,13 @@ namespace SchoolManagementAPI.Repositories.Repo
             };
         }
 
+        public async Task<IEnumerable<Lecturer>> GetAll()
+        {
+            // Implementation to retrieve all lecturers from the database
+            var lecturer = await _lecturerCollection.Find(_ => true).ToListAsync();
+            return lecturer;
+        }
+
         public async Task Create(Lecturer lecturer)
         {
             await _lecturerCollection.InsertOneAsync(lecturer);

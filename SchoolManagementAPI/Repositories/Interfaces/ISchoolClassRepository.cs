@@ -9,6 +9,8 @@ namespace SchoolManagementAPI.Repositories.Interfaces
         public Task Create(SchoolClass schoolClass);
         public Task<SchoolClass?> Delete(string id);
 
+        Task<IEnumerable<SchoolClass>> GetAll();
+
         public Task<SchoolClass?> GetSingle(string id);
         public Task<IEnumerable<SchoolClass>> GetbyTextFilter(string textFilter);
         public Task<IEnumerable<SchoolClass>> GetManyRange(int start, int end);

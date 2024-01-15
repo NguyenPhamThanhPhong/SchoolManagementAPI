@@ -44,7 +44,11 @@ namespace SchoolManagementAPI.Repositories.Repo
             Task semester = _semesterCollection.UpdateOneAsync(filterSemester,updateSemester);
             await Task.WhenAll(student, lecturer,semester);
         }
-
+        public async Task<IEnumerable<SchoolClass>> GetAll()
+        {
+            var schoolClass = await _schoolClassCollection.Find(_ => true).ToListAsync();
+            return schoolClass;
+        }
         public async Task<SchoolClass?> Delete(string id)
         {
             var result = await _schoolClassCollection.FindOneAndDeleteAsync(s=>s.ID== id);
