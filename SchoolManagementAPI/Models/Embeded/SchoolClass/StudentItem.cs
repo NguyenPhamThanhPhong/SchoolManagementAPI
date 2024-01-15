@@ -1,17 +1,21 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-
-namespace SchoolManagementAPI.Models.Embeded.SchoolClass
+﻿namespace SchoolManagementAPI.Models.Embeded.SchoolClass
 {
-    public class ExamMileStone
+    public class StudentItem
     {
-        public string? Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime? StartTime { get; set; }
-        public TimeSpan? Duration { get; set; }
-        public string? Room { get; set; }
-        public ExamMileStone()
-        {
-            Id = string.Empty; Name = string.Empty;
+        public int Progress { get; set; }
+        public int Midterm { get; set; }
+        public int Practice { get; set; }
+        public int Final { get; set; }
+
+        public StudentItem() { 
+            Id = string.Empty; 
+            Name = string.Empty;
+            Progress = -1;
+            Midterm = -1;
+            Practice = -1;
+            Final = -1;
         }
         public override bool Equals(object obj)
         {

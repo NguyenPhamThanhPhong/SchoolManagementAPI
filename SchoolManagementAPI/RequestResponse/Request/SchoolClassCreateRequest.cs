@@ -17,6 +17,5 @@ namespace SchoolManagementAPI.RequestResponse.Request
         public DataLink? Subject { get; set; }
         public string? SemesterId { get; set; }
         public ClassSchedule? Schedule { get; set; }
-        public List<StudentLog>? StudentLogs { get; set; }
     }
 }

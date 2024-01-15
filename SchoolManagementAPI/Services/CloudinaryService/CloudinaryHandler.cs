@@ -106,6 +106,7 @@ namespace SchoolManagementAPI.Services.CloudinaryService
             if (string.IsNullOrEmpty(Url))
                 return;
             var publicId = GetPublicIdFromUrl(Url);
+            Console.WriteLine(publicId);
 
             if (!string.IsNullOrEmpty(publicId))
             {
@@ -133,7 +134,7 @@ namespace SchoolManagementAPI.Services.CloudinaryService
 
         public async Task DeleteMany(List<string> urls)
         {
-            Task[] tasks = new Task[urls.Count];
+            List<Task> tasks = new List<Task>();
             foreach(string url in urls)
                 tasks.Append(Delete(url));
             await Task.WhenAll(tasks);
@@ -144,22 +145,26 @@ namespace SchoolManagementAPI.Services.CloudinaryService
             Uri uri;
             if (Uri.TryCreate(cloudinaryUrl, UriKind.Absolute, out uri))
             {
-                // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/{upload_type}/{version}/{public_id}/{format}
-                // Extract the part after "upload/" and before the version, which is the public_id
-
                 const string uploadPathSegment = "upload/";
 
                 int uploadIndex = uri.Segments.ToList().FindIndex(segment => segment.Equals(uploadPathSegment, StringComparison.OrdinalIgnoreCase));
                 if (uploadIndex != -1 && uploadIndex < uri.Segments.Length - 1)
                 {
-                    // The public ID is the next segment after "upload/"
-                    return uri.Segments[uploadIndex + 1].TrimEnd('/');
+                    int startIndex = uploadIndex + 1;
+                    int length = uri.Segments.Length - startIndex;
+
+                    // Use ArraySegment to get the desired segments
+                    ArraySegment<string> segments = new ArraySegment<string>(uri.Segments, startIndex, length);
+
+                    // Concatenate the segments and trim any trailing '/'
+                    return string.Join("", segments.Select(s => s.TrimEnd('/')));
                 }
             }
 
             // If the URL format doesn't match, return null
             return null;
         }
+
 
     }
 }

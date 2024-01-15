@@ -11,6 +11,7 @@ using SchoolManagementAPI.RequestResponse.Request;
 using SchoolManagementAPI.Services.CloudinaryService;
 using SchoolManagementAPI.Services.Configs;
 using System.Reflection.Metadata;
+using System.Text.Json;
 
 namespace SchoolManagementAPI.Controllers
 {
@@ -53,7 +54,7 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             var deleteResult = await _schoolClassRepository.Delete(id);
 
-            if (deleteResult!=null)
+            if (deleteResult != null)
                 return Ok($"deleted {deleteResult}");
             return BadRequest(deleteResult);
         }
@@ -65,7 +66,7 @@ namespace SchoolManagementAPI.Controllers
 
             var filter = Builders<SchoolClass>.Filter.In(s => s.ID, ids);
             var deleteResult = await _schoolClassCollection.DeleteManyAsync(filter);
-            return Ok(deleteResult.DeletedCount>0);
+            return Ok(deleteResult.DeletedCount > 0);
         }
 
         [HttpGet("/class-get-by-id/{id}")]
@@ -104,24 +105,27 @@ namespace SchoolManagementAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID , request.ID);
+            string studentId = request.StudentId;
+            string classId = request.ID;
+            var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
+            var filterStudent = Builders<Student>.Filter.Eq(s=>s.ID, studentId);
+            Console.WriteLine(JsonSerializer.Serialize(request));
             if (request.option == UpdateOption.push)
             {
-                var studentlog = new StudentLog { ID = request.StudentId };
-                var update = Builders<SchoolClass>.Update.Push(s => s.StudentLogs, studentlog);
-                var isupdated = await _schoolClassCollection.UpdateOneAsync(filter, update);
-                var updateStudent = Builders<Student>.Update.Push(s => s.Classes, request.ID);
-                var isupdate2 = await _studentCollection.UpdateOneAsync(s => s.ID == request.StudentId, updateStudent);
-                Console.WriteLine("run here" + isupdated.ModifiedCount);
-                Console.WriteLine("rrun 333" + isupdate2.ModifiedCount);
+                var studentItem = new StudentItem { Id = studentId, Name = request.Name };
+                var update = Builders<SchoolClass>.Update.AddToSet(s => s.StudentItems,studentItem);
+                var updateStudent = Builders<Student>.Update.AddToSet(s => s.Classes, classId);
+                await _schoolClassCollection.UpdateOneAsync(filter, update);
+                await _studentCollection.UpdateOneAsync(filterStudent, updateStudent);
             }
             else
             {
+                var update = Builders<SchoolClass>.Update
+                    .PullFilter(s => s.StudentLogs, Builders<StudentLog>.Filter.Eq(stu => stu.ID, studentId));
+                var updateStudent = Builders<Student>.Update.Pull(s => s.Classes, classId);
 
-                var update = Builders<SchoolClass>.Update.PullFilter(s => s.StudentLogs, Builders<StudentLog>.Filter.Eq(stu => stu.ID, request.StudentId));
                 await _schoolClassCollection.UpdateOneAsync(filter, update);
-                var updateStudent = Builders<Student>.Update.Pull(s => s.Classes, request.ID);
-                await _studentCollection.UpdateOneAsync(s => s.ID == request.StudentId, updateStudent);
+                await _studentCollection.UpdateOneAsync(filterStudent, updateStudent);
             }
 
 
@@ -145,7 +149,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok("updated");
         }
         [HttpPost("/class-update-exam/{id}")]
-        public async Task<IActionResult> UpdateExams([FromQuery]string id,[FromBody] List<ExamMileStone> exams)
+        public async Task<IActionResult> UpdateExams([FromQuery] string id, [FromBody] List<ExamMileStone> exams)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -154,53 +158,24 @@ namespace SchoolManagementAPI.Controllers
             await _schoolClassCollection.UpdateOneAsync(filter, update);
             return Ok("updated");
         }
-        [HttpPost("/class-update-")]
 
-        [HttpPost("/class-append-sections/{id}/{position}/{updateOption}")]
-        public async Task<IActionResult> AppendSection(string id, int position, UpdateOption option, [FromForm] SchoolClassUpdateSectionsRequest request)
+
+        [HttpPost("class-update-sections/{id}/{index}")]
+        public async Task<IActionResult> UpdateSection(string id, int index, [FromForm] SchoolClassUpdateSectionsRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            var section = _mapper.Map<Section>(request);
-            var isUpdated = false;
-            try
-            {
-                switch (option)
-                {
-                    case UpdateOption.set:
-                        {
-                            var filter = Builders<SchoolClass>.Filter.And(
-                            Builders<SchoolClass>.Filter.Eq(c => c.ID, id),
-                            Builders<SchoolClass>.Filter.ElemMatch(c => c.Sections, s => s.Position == position));
-                            foreach (var url in request.PrevUrls)
-                                await _cloudinaryHandler.Delete(url);
-                            section.DocumentUrls = await _cloudinaryHandler.UploadImages(request.FormFiles, _schoolClassFolderName);
-                            var update = Builders<SchoolClass>.Update.Set(s => s.Sections[-1], section);
-                            isUpdated = await _schoolClassRepository.UpdatebyFilter(filter, update, false);
-                        }
-                        break;
-                    case UpdateOption.pull:
-                        {
-                            var filter = Builders<SchoolClass>.Filter.Eq(c => c.ID, id);
-                            var update = Builders<SchoolClass>.Update.PullFilter(c => c.Sections, s => s.Position == position);
-                            await _schoolClassRepository.UpdatebyFilter(filter, update, false);
-                        }
-                        break;
-                    case UpdateOption.push:
-                        {
-                            var filter = Builders<SchoolClass>.Filter.And(
-                            Builders<SchoolClass>.Filter.Eq(c => c.ID, id));
-                            var update = Builders<SchoolClass>.Update.Push(c => c.Sections, section);
-                            await _schoolClassRepository.UpdatebyFilter(filter, update, false);
-                        }
-                        break;
-                }
-            }
-            catch(Exception ex)
-            {
-                BadRequest(new { isUpdated = false, errorMessage = ex.Message });
-            }
-            return Ok(isUpdated);
+            if (index == -1)
+                return BadRequest("-1 mean no");
+            var section = request.Sections[index];
+            if (request.FormFiles != null && request.FormFiles.Count > 0)
+                section.DocumentUrls = await _cloudinaryHandler.UploadImages(request.FormFiles, _schoolClassFolderName);
+
+            var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, id);
+            var update = Builders<SchoolClass>.Update.Set(s => s.Sections, request.Sections);
+
+            await _schoolClassCollection.UpdateOneAsync(filter, update);
+            return Ok();
         }
     }
 }

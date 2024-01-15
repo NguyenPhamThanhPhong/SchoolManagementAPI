@@ -19,6 +19,7 @@ namespace SchoolManagementAPI.Models.Entities
         public DataLink? Lecturer { get; set; }
         public ClassSchedule? Schedule { get; set; }
         public List<StudentLog> StudentLogs { get; set; }
+        public List<StudentItem> StudentItems { get; set; }
         public List<ExamMileStone> Exams { get; set; }
         public List<Section> Sections { get; set; }
 
@@ -28,6 +29,7 @@ namespace SchoolManagementAPI.Models.Entities
             StudentLogs = new List<StudentLog>();
             Exams = new List<ExamMileStone>();
             Sections = new List<Section>();
+            StudentItems = new List<StudentItem>();
         }
         public static string GetFieldName<T>(Expression<Func<SchoolClass, T>> expression)
         {

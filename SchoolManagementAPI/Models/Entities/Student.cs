@@ -8,12 +8,12 @@ namespace SchoolManagementAPI.Models.Entities
     [BsonIgnoreExtraElements]
     public class Student : SchoolMember
     {
-        public Dictionary<string,List<CreditLog>> creditLogs { get; set; }
+        public List<CreditLog> creditLogs { get; set; }
 
         public Student(): base()
         {
             Role = "student";
-            creditLogs = new Dictionary<string, List<CreditLog>>();
+            creditLogs = new List<CreditLog>();
         }
         public static string GetFieldName<T>(Expression<Func<Student, T>> expression)
         {

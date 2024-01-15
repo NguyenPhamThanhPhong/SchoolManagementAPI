@@ -184,6 +184,7 @@ namespace SchoolManagementAPI.Controllers
 
         private bool TryDeserializeJson<T>(string? json, out T? result)
         {
+            Console.WriteLine(json);
             if (string.IsNullOrWhiteSpace(json))
             {
                 result = default(T?);

@@ -4,15 +4,16 @@ namespace SchoolManagementAPI.RequestResponse.Request
 {
     public class SchoolClassRegistrationRequest
     {
-        public string ID { get; set; }
+        public string ID { get; set; } // class Id
+        public string Name { get; set; }
         public UpdateOption option { get; set; }
         public string StudentId { get; set; }
-        public List<int>? Scores { get;set; } 
+
         public SchoolClassRegistrationRequest()
         {
             ID = string.Empty;
+            Name = string.Empty;
             StudentId = string.Empty;
-            Scores = new List<int> { -1, -1, -1, -1, -1 };
         }
 
     }
