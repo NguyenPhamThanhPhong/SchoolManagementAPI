@@ -18,6 +18,12 @@ namespace SchoolManagementAPI.Repositories.Repo
             _studentCollection = databaseConfigs.StudentCollection;
         }
 
+        public async Task<IEnumerable<Student>> GetAll()
+        {
+            // Implementation to retrieve all students from the database
+            var student = await _studentCollection.Find(_ => true).ToListAsync();
+            return student;
+        }
         public async Task Create(Student student)
         {
             await _studentCollection.InsertOneAsync(student);

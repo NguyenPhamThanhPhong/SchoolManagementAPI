@@ -37,6 +37,16 @@ namespace SchoolManagementAPI.Controllers
             _studentCollection = databaseConfig.StudentCollection;
         }
 
+        [HttpGet("/class-get-all")]
+        public async Task<IActionResult> GetAll()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var schoolClass = await _schoolClassRepository.GetAll();
+            return Ok(schoolClass);
+        }
+
         [HttpPost("/class-create")]
         public async Task<IActionResult> Create([FromBody] SchoolClassCreateRequest request)
         {

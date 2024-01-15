@@ -5,6 +5,7 @@ namespace SchoolManagementAPI.Repositories.Interfaces
 {
     public interface IStudentRepository
     {
+        public Task<IEnumerable<Student>> GetAll();
         public Task Create(Student lecturer);
         public Task<Student?> Delete(string id);
 

@@ -66,6 +66,15 @@ namespace SchoolManagementAPI.Controllers
             return Ok(lecturer);
         }
 
+        [HttpGet("/lecturer-get-all")]
+        public async Task<IActionResult> GetAll()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var lecturer = await _lecturerRepository.GetAll();
+            return Ok(lecturer);
+        }
 
         [HttpPost("/lecturer-login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
