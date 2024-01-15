@@ -16,6 +16,7 @@ namespace SchoolManagementAPI.Controllers
     {
         private readonly IMongoCollection<SchoolClass> _schoolClassCollection;
         private readonly IMongoCollection<Student> _studentCollection;
+        private readonly FindOneAndUpdateOptions<SchoolClass> _schoolClassOptions;
         private readonly IMapper _mapper;
 
         public ExamController(IMapper mapper, DatabaseConfig databaseConfig)
@@ -23,6 +24,10 @@ namespace SchoolManagementAPI.Controllers
             _mapper = mapper;
             _schoolClassCollection = databaseConfig.SchoolClassCollection;
             _studentCollection = databaseConfig.StudentCollection;
+            _schoolClassOptions = new FindOneAndUpdateOptions<SchoolClass>
+            {
+                ReturnDocument = ReturnDocument.After, 
+            };
         }
 
         [HttpPost("/create-exam/{classId}")]
@@ -33,8 +38,8 @@ namespace SchoolManagementAPI.Controllers
             exam.Id = Guid.NewGuid().ToString();
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
             var update = Builders<SchoolClass>.Update.Push(s => s.Exams, exam);
-            await _schoolClassCollection.UpdateOneAsync(filter, update);
-            return Ok();
+            var result = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update,_schoolClassOptions);
+            return Ok(result);
         }
         [HttpDelete("/delete-exam/{classId}/{examId}")]
         public async Task<IActionResult> Delete(string classId, string examId)
@@ -44,8 +49,8 @@ namespace SchoolManagementAPI.Controllers
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
             var update = Builders<SchoolClass>.Update
                 .PullFilter(s => s.Exams, Builders<ExamMileStone>.Filter.Eq(e => e.Id, examId));
-            await _schoolClassCollection.UpdateOneAsync(filter, update);
-            return Ok();
+            var result = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update, _schoolClassOptions);
+            return Ok(result);
         }
         [HttpPost("/update-exam/{classId}")]
         public async Task<IActionResult> Update(string classId, [FromBody] List<ExamMileStone> exams)
@@ -54,8 +59,8 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
             var update = Builders<SchoolClass>.Update.Set(s => s.Exams, exams);
-            await _schoolClassCollection.UpdateOneAsync(filter, update);
-            return Ok();
+            var result = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update, _schoolClassOptions);
+            return Ok(result);
         }
 
         [HttpPost("/save-scores/{classId}")]
@@ -65,8 +70,8 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
             var update = Builders<SchoolClass>.Update.Set(s => s.StudentItems, studentItems);
-            await _schoolClassCollection.UpdateOneAsync(filter, update);
-            return Ok();
+            var result = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update, _schoolClassOptions);
+            return Ok(result);
         }
         [HttpPost("/submit-scores/{classId}")]
         public async Task<IActionResult> SubmitScores(string classId, [FromBody] List<StudentItem> studentItems)
@@ -75,7 +80,7 @@ namespace SchoolManagementAPI.Controllers
                 return BadRequest(ModelState);
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
             var update = Builders<SchoolClass>.Update.Set(s => s.StudentItems, studentItems);
-            var schoolClass = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update);
+            var schoolClass = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update,_schoolClassOptions);
             List<string> studentIds = studentItems.Select(s => s.Id).ToList();
             List<Task> updateStudentTasks = new List<Task>();
 
@@ -104,7 +109,7 @@ namespace SchoolManagementAPI.Controllers
             }
             await Task.WhenAll(updateStudentTasks);
 
-            return Ok();
+            return Ok(schoolClass);
         }
     }
 }
