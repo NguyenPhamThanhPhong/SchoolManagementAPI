@@ -25,6 +25,8 @@ namespace SchoolManagementAPI.Controllers
         private readonly string _schoolClassFolderName;
         private readonly IMongoCollection<SchoolClass> _schoolClassCollection;
         private readonly IMongoCollection<Student> _studentCollection;
+        private readonly FindOneAndUpdateOptions<SchoolClass> _schoolClassOptions;
+
 
         public SchoolClassController(ISchoolClassRepository schoolClassRepository, IMapper mapper, DatabaseConfig databaseConfig,
             CloudinaryHandler cloudinaryHandler, CloudinaryConfig cloudinaryConfig)
@@ -35,6 +37,10 @@ namespace SchoolManagementAPI.Controllers
             _schoolClassFolderName = cloudinaryConfig.ClassSectionFolderName;
             _schoolClassCollection = databaseConfig.SchoolClassCollection;
             _studentCollection = databaseConfig.StudentCollection;
+            _schoolClassOptions = new FindOneAndUpdateOptions<SchoolClass>
+            {
+                ReturnDocument = ReturnDocument.After,
+            };
         }
 
         [HttpGet("/class-get-all")]
@@ -118,24 +124,28 @@ namespace SchoolManagementAPI.Controllers
             string studentId = request.StudentId;
             string classId = request.ID;
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, classId);
-            var filterStudent = Builders<Student>.Filter.Eq(s=>s.ID, studentId);
-            Console.WriteLine(JsonSerializer.Serialize(request));
+            var filterStudent = Builders<Student>.Filter.Eq(s => s.ID, studentId);
+            var studentItem = new StudentItem { Id = studentId, Name = request.Name };
             if (request.option == UpdateOption.push)
             {
-                var studentItem = new StudentItem { Id = studentId, Name = request.Name };
-                var update = Builders<SchoolClass>.Update.AddToSet(s => s.StudentItems,studentItem);
+
+                var update = Builders<SchoolClass>.Update.AddToSet(s => s.StudentItems, studentItem);
                 var updateStudent = Builders<Student>.Update.AddToSet(s => s.Classes, classId);
-                await _schoolClassCollection.UpdateOneAsync(filter, update);
-                await _studentCollection.UpdateOneAsync(filterStudent, updateStudent);
+                await Task.WhenAll(
+                    _schoolClassCollection.UpdateOneAsync(filter, update),
+                    _studentCollection.UpdateOneAsync(filterStudent, updateStudent));
             }
             else
             {
-                var update = Builders<SchoolClass>.Update
-                    .PullFilter(s => s.StudentLogs, Builders<StudentLog>.Filter.Eq(stu => stu.ID, studentId));
+                var updatePull = Builders<SchoolClass>.Update.PullFilter(s => s.StudentItems, Builders<StudentItem>.Filter.Eq(stu => stu.Id, studentId));
+                var updatePush = Builders<SchoolClass>.Update.Push(s => s.StudentItems, studentItem);
+
                 var updateStudent = Builders<Student>.Update.Pull(s => s.Classes, classId);
 
-                await _schoolClassCollection.UpdateOneAsync(filter, update);
-                await _studentCollection.UpdateOneAsync(filterStudent, updateStudent);
+                await Task.WhenAll(
+                    _schoolClassCollection.UpdateOneAsync(filter, updatePull),
+                    _schoolClassCollection.UpdateOneAsync(filter, updatePush),
+                    _studentCollection.UpdateOneAsync(filterStudent, updateStudent));
             }
 
 
@@ -175,17 +185,25 @@ namespace SchoolManagementAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            if (index == -1)
-                return BadRequest("-1 mean no");
-            var section = request.Sections[index];
-            if (request.FormFiles != null && request.FormFiles.Count > 0)
-                section.DocumentUrls = await _cloudinaryHandler.UploadImages(request.FormFiles, _schoolClassFolderName);
-
+            if (index != -1)
+            {
+                var section = request.Sections[index];
+                section.DocumentUrls = request.PrevUrls;
+                if (request.FormFiles != null && request.FormFiles.Count > 0)
+                {
+                    var uploadResult = await _cloudinaryHandler.UploadImages(request.FormFiles, _schoolClassFolderName);
+                    if (section.DocumentUrls != null)
+                        foreach (var item in uploadResult)
+                            section.DocumentUrls.Add(item.Key, item.Value);
+                    else
+                        section.DocumentUrls = uploadResult;
+                }
+            }
             var filter = Builders<SchoolClass>.Filter.Eq(s => s.ID, id);
             var update = Builders<SchoolClass>.Update.Set(s => s.Sections, request.Sections);
 
-            await _schoolClassCollection.UpdateOneAsync(filter, update);
-            return Ok();
+            var result = await _schoolClassCollection.FindOneAndUpdateAsync(filter, update, _schoolClassOptions);
+            return Ok(result);
         }
     }
 }

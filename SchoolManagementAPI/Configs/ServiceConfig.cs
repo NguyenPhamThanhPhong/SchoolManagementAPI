@@ -113,7 +113,7 @@ namespace SchoolManagementAPI.Configs
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000") // thêm IP được access vào đây
+                    builder.WithOrigins("http://localhost:3000", "http://192.168.1.3:3000") // thêm IP được access vào đây
                            .AllowAnyHeader()
                            .AllowAnyMethod();
                 });
