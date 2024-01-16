@@ -13,13 +13,27 @@ namespace SchoolManagementAPI.Test.Services.Test
     public class TokenGeneratorTest
     {
         private TokenGenerator _tokenGenerator;
+        private readonly Random random = new Random();
+        private const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        public string GenerateRandomString(int length)
+        {
+            char[] stringChars = new char[length];
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+
+            return new String(stringChars);
+        }
 
         [SetUp]
         public void Setup()
         {
             var tokenConfig = new TokenConfig
             {
-                AccessTokenSecret = "MySecretKey12345!MySecretKey6789!",
+                AccessTokenSecret = GenerateRandomString(32),
                 Issuer = "TestIssuer",
                 Audience = "TestAudience",
                 AccessTokenExpirationMinutes = 60
