@@ -66,30 +66,49 @@ namespace SchoolManagementAPI.Controllers
         }
 
         [HttpPost("/post-update-instance")]
-        public async Task<IActionResult> UpdateInstance([FromForm] PostUpdateRequest request)
+        public async Task<IActionResult> UpdateInstance([FromForm] FormDataRequest formDataRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (!TryDeserializeJson(formDataRequest.Requestbody, out PostUpdateRequest? request))
+                return BadRequest(request);
+            if (request == null)
+                return BadRequest(ModelState);
             var post = _mapper.Map<Post>(request);
-            if(request.PrevUrls !=null && request.PrevUrls?.Count > 0)
-                foreach (var url in request.PrevUrls)
-                    await _cloudinaryHandler.Delete(url);
 
-            if (request.Files != null && request.Files.Count > 0)
-                post.FileUrls = await _cloudinaryHandler.UploadImages(request.Files,_postFolderName);
-            await _postRepository.Create(post);
+            if(request.KeepUrls!=null && request.KeepUrls?.Count > 0)
+                post.FileUrls = request.KeepUrls;
+
+            if (formDataRequest.Files?.Count != null && formDataRequest.Files?.Count > 0)
+            {
+                var comingUrls = await _cloudinaryHandler.UploadImages(formDataRequest.Files, _postFolderName);
+                Console.WriteLine(comingUrls.Count);
+                Console.WriteLine(JsonSerializer.Serialize(comingUrls));
+                if (post.FileUrls == null)
+                {
+                    post.FileUrls = comingUrls;
+                }
+                else
+                {
+                    if (comingUrls != null)
+                        foreach (var kvp in comingUrls)
+                            post.FileUrls.Add(kvp.Key, kvp.Value);
+                }
+            }
+            var filter = Builders<Post>.Filter.Eq(s => s.ID, request.ID);
+            await _postCollection.FindOneAndReplaceAsync(filter, post);
             return Ok(post);
         }
 
         [HttpDelete("/post-delete/{id}")]
-        public async Task<IActionResult> Delete(string id,[FromBody]List<string> prevUrls)
+        public async Task<IActionResult> Delete(string id)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var isDeleted = await _postRepository.Delete(id);
-            if(prevUrls!=null && prevUrls.Count > 0)
-                foreach (var url in prevUrls)
-                    await _cloudinaryHandler.Delete(url);
+            //if(prevUrls!=null && prevUrls.Count > 0)
+            //    foreach (var url in prevUrls)
+            //        await _cloudinaryHandler.Delete(url);
             return Ok(isDeleted);
         }
         [HttpDelete("/post-delete-many")]

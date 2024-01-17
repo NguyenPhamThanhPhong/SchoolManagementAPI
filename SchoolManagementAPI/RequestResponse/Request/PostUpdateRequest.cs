@@ -7,7 +7,7 @@
         public string Title { get; set; }
         public string Content { get; set; }
         public List<string> FacultyTags { get; set; }
-        public List<string> PrevUrls { get; set; }
+        public Dictionary<string,string?>? KeepUrls { get; set; }
         public List<IFormFile> Files { get; set; }
     }
 }
