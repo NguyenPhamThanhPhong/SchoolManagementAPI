@@ -7,11 +7,13 @@ namespace SchoolManagementAPI.Models.Embeded.SchoolClass
         public string? Id { get; set; }
         public string Name { get; set; }
         public DateTime? StartTime { get; set; }
+        public string DateString { get; set; }
         public TimeSpan? Duration { get; set; }
         public string? Room { get; set; }
         public ExamMileStone()
         {
             Id = string.Empty; Name = string.Empty;
+            DateString = string.Empty;
         }
         public override bool Equals(object obj)
         {

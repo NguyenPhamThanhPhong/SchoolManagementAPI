@@ -155,7 +155,7 @@ namespace SchoolManagementAPI.Controllers
             return Ok(true);
         }
 
-        [HttpPost("/lecturer-update-instance/{prevName}")]
+        [HttpPost("/lecturer-update-instance")]
         public async Task<IActionResult> UpdateStringFields([FromForm] FormDataRequest formDataRequest)
         {
             if (!ModelState.IsValid)
